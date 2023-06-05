@@ -1,7 +1,7 @@
 
 <img src="assets/wami_logo.png" width="200px">
-# WAMI - What am I
 
+# WAMI - What am I
 ## Description:
 WAMI is a user-friendly tool designed in Rust language, powered by Cargo, to assist individuals who struggle with remembering the names of the various programs they utilize. This open-source program aims to simplify the process of finding the most suitable programs for specific tasks.
 
