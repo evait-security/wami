@@ -75,6 +75,15 @@ fn main() {
                 .required(false)
                 .multiple(false)
         )
+        .arg(
+            Arg::with_name("show-all")
+                .short("a")
+                .long("show-all")
+                .takes_value(false)
+                .help("Display detailed list of all available information.")
+                .required(false)
+                .multiple(false)
+        )
         .author("NxtTAB <wami@evait.de>")
         .about("Created at 10.07.2023")
         .get_matches();
@@ -139,19 +148,29 @@ fn main() {
         );
     }
 
+    let mut max_list = 10;
+
     if let Some(search_names) = matches.value_of("max") {
         let result: Result<usize, _> = search_names.parse();
         match result {
             Ok(value) => {
-                lake.print_top_hits(value);
+                max_list = value;
+                // lake.print_top_hits(value);
             }
             Err(_) => {
                 // Parsing failed
                 println!("Failed to parse the max value please enter a vialed number.");
             }
         }
+    } 
+    // else {
+    //     lake.print_top_hits(10); // print the sorted top lake templates.
+    // }
+
+    if matches.is_present("show-all") {
+        lake.print_top_hits(max_list);
     } else {
-        lake.print_top_hits(10); // print the sorted top lake templates.
+        lake.print_top_short_list(max_list);
     }
 
 }

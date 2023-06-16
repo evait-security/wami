@@ -96,6 +96,15 @@ impl Template {
         out_string.to_owned()
     }
 
+    pub fn to_short_string(&self) -> String {
+        let mut out_string: String = String::new();
+        out_string.push_str(&self.id);
+        out_string.push_str(": ");
+        out_string.push_str(&self.title);
+
+        out_string.to_owned()
+    }
+
     // Put all tags in a line and separate them with an , except the last own.
     fn tags_to_string(&self) -> String {
         let mut out_string: String = String::new();

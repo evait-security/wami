@@ -1,5 +1,3 @@
-// next step is to implement the load url and read folder function.
-
 use crate::{template::Template, yaml_template, search::Search};
 use std::{fs::{self, File}, process, io::{self, Read}};
 use reqwest::Client;
@@ -28,8 +26,8 @@ pub struct Lake {
 impl Lake {
     
     // Setting the default path of the lake.
-    pub fn default( in_search: Search
-        
+    pub fn default( 
+        in_search: Search    
     ) -> Lake {
         Lake::new(
             "https://github.com/evait-security/wami-templates/archive/refs/heads/main.zip",
@@ -62,12 +60,25 @@ impl Lake {
         // Sort the vector in descending order based on distance.
         let _ = &self.templates.sort_by(|a, b| b.distance().partial_cmp(&a.distance()).unwrap());
 
-        // Take the as many we want form the top of the sorted templates.
+        // Take as many we want form the top of the sorted templates.
         let max_hits_templates = &self.templates[..how_many_max.min(self.templates.len())];
 
         for (index, template) in max_hits_templates.iter().enumerate() {
             println!("Number: {}", index + 1);
             println!("Program: {}", template.to_string());
+        }
+    }
+
+    pub fn print_top_short_list(&mut self, how_many_max: usize){
+        // Sort the vector in descending order based on distance.
+        let _ = &self.templates.sort_by(|a, b| b.distance().partial_cmp(&a.distance()).unwrap());
+
+        // Take as many we want form the top of the sorted templates.
+        let max_hits_templates = &self.templates[..how_many_max.min(self.templates.len())];
+
+        for (index, template) in max_hits_templates.iter().enumerate() {
+            println!("{}: {}", index + 1, template.to_short_string());
+            
         }
     }
 
@@ -208,7 +219,7 @@ impl Lake {
                 } else {
                                         
                     // Error there is a problem with the dir path,
-                    // maybe there is a file that hast the same name as the dir path.
+                    // maybe there is a file that has the same name as the dir path.
                     // I will not delete it, because I do not now for what that file is.
                     // Maybe there are no user rights and I am not able to read at the path.
                     // I will print out the the dir path, so there is an possibility to find the error.
