@@ -21,22 +21,6 @@ pub struct Search<> {
 
 impl Search {
 
-    // pub fn new(
-    //     in_id: String,
-    //     in_title: String,
-    //     in_tags: Vec<String>,
-    //     in_description: String,
-    //     in_references: Vec<String>
-    // ) -> Search {
-    //     Search{
-    //         id: Template::convert_to_lowercase_alphanumeric_with_hyphens(&in_id),
-    //         title: in_title.to_owned(),
-    //         tags: Template::convert_tags_to_excepted_format(in_tags),
-    //         description: in_description.to_owned(),
-    //         references: in_references.to_owned()
-    //     }
-    // }
-
     pub fn new_empty() -> Search {
         Search { 
             id: "".to_owned(),

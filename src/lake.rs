@@ -58,29 +58,6 @@ impl Lake {
         }
     }
 
-    // pub fn in_vec(&self, in_vec: Vec<String>) -> Vec<String> {
-    //     for template in &self.templates {
-    //         template.in_Vec(in_vec.to_owned());
-    //     }
-    //     in_vec
-    // }
-
-    // pub fn url_get(&self) -> String {
-    //     self.url.to_owned()
-    // } 
-
-    // pub fn to_string(&self) -> String {
-    //     let mut out_string: String = String::new();
-    //     for (index, template) in self.templates.iter().enumerate() {
-    //         let out_index = index + 1;
-    //         out_string.push_str(&out_index.to_string());
-    //         out_string.push_str(": ");
-    //         out_string.push_str(&template.to_string().to_owned());
-    //     }
-
-    //     out_string
-    // }
-
     pub fn print_top_hits(&mut self, how_many_max: usize){
         // Sort the vector in descending order based on distance.
         let _ = &self.templates.sort_by(|a, b| b.distance().partial_cmp(&a.distance()).unwrap());
