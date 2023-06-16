@@ -155,7 +155,7 @@ impl Template {
         let mut out_string = String::new();
 
         for c in in_str.chars() {
-            if c.is_ascii_alphanumeric() || c == '-' {
+            if c.is_ascii_alphanumeric() || c == '-' || c.is_whitespace(){
                 out_string.push(c.to_ascii_lowercase());
             }
         }

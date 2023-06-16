@@ -31,8 +31,17 @@ fn main() {
                 .multiple(true)
         )
         .arg(
-            Arg::with_name("search_tags")
+            Arg::with_name("search-title")
                 .short("t")
+                .long("search-title")
+                .value_name("SEARCH_TITLE")
+                .help("This will search throw all the title with the values of SEARCH_TITLE.")
+                .required(false)
+                .multiple(true)
+        )
+        .arg(
+            Arg::with_name("search-tags")
+                .short("g")
                 .long("search-tags")
                 .value_name("SEARCH_TAGS")
                 .help("This will search throw all the tags with the values.")
@@ -40,7 +49,7 @@ fn main() {
                 .multiple(true)
         )
         .arg(
-            Arg::with_name("search_description")
+            Arg::with_name("search-description")
                 .short("d")
                 .long("search-description")
                 .value_name("SEARCH_DESCRIPTION")
@@ -49,7 +58,7 @@ fn main() {
                 .multiple(true)
         )
         .arg(
-            Arg::with_name("search_references")
+            Arg::with_name("search-references")
                 .short("r")
                 .long("search-references")
                 .value_name("SEARCH_REFERENCES")
@@ -91,17 +100,21 @@ fn main() {
     let mut search: search::Search = search::Search::new_empty();
 
     if let Some(search_names) = matches.values_of("search-all") {
-        let in_search_all_string: String = search_names.collect::<Vec<_>>().join(" ");
-        let mut in_search_all_vec: Vec<String> = Vec::<String>::new();
-        in_search_all_vec.push(in_search_all_string.to_owned());
-        // println!("Search names specified: {:?}", in_search_all_string.to_owned());
+        let in_search_all_string: String = search_names.clone().collect::<Vec<_>>().join(" ");
         search.id_set(in_search_all_string.to_owned());
         search.title_set(in_search_all_string.to_owned());
-        search.tags_set(in_search_all_vec.to_owned());
+    
+        let mut tag_vec = search.tags_get().to_owned();
+        tag_vec.push(search_names.clone().collect::<Vec<_>>().join(" "));
+        search.tags_set(tag_vec);
+    
         search.description_set(in_search_all_string.to_owned());
-        search.reference_set(in_search_all_vec.to_owned());
+    
+        let mut reference_vec = search.reference_get().to_owned();
+        reference_vec.push(search_names.clone().collect::<Vec<_>>().join(" "));
+        search.reference_set(reference_vec);    
     }
-
+    
     if let Some(search_names) = matches.values_of("search-unique-name") {
         let in_search_unique_name: String = search_names.collect::<Vec<_>>().join(" ");
         search.id_set(search.id_get() + &in_search_unique_name);
@@ -113,12 +126,10 @@ fn main() {
     }
 
     if let Some(search_names) = matches.values_of("search-tags") {
-        let in_search_tags: String = search_names.collect::<Vec<_>>().join(" ");
-        let mut in_search_tags_vec: Vec<String> = Vec::<String>::new();
-        in_search_tags_vec.push(in_search_tags.to_owned());
-        let mut tag: Vec<String> = search.tags_get();
-        tag.extend(in_search_tags_vec);
-        search.tags_set(tag);
+        let in_search_tags: Vec<String> = search_names.map(String::from).collect();
+        let mut tags: Vec<String> = search.tags_get();
+        tags.extend(in_search_tags);
+        search.tags_set(tags);
     }
 
     if let Some(search_names) = matches.values_of("search-description") {
@@ -155,7 +166,6 @@ fn main() {
         match result {
             Ok(value) => {
                 max_list = value;
-                // lake.print_top_hits(value);
             }
             Err(_) => {
                 // Parsing failed
@@ -163,9 +173,6 @@ fn main() {
             }
         }
     } 
-    // else {
-    //     lake.print_top_hits(10); // print the sorted top lake templates.
-    // }
 
     if matches.is_present("show-all") {
         lake.print_top_hits(max_list);
