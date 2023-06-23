@@ -70,24 +70,25 @@ impl Search {
     pub fn reference_set(&mut self, in_reference: Vec<String>) {
         self.references = in_reference.to_owned();
     }
-
-    // Debug search values
-    pub fn to_string(&self) -> String {
-        let mut out_string: String = String::new();
-        out_string = out_string.to_owned() + &"  unique name: " + &self.id_get() + &"\n";
-        out_string = out_string.to_owned() + &"  title: " + &self.title_get() + &"\n";
-        out_string = out_string.to_owned() + &"  tags: \n";
-        for tag in &self.tags_get() {
-            out_string = out_string.to_owned() + &"    " + &tag + &"\n";
-        }
-        out_string = out_string.to_owned() + &"  description: " + &self.description_get() + &"\n";
-        out_string = out_string.to_owned() + &"  references: \n";
-        for reference in &self.reference_get() {
-            out_string = out_string.to_owned() + &"    " + &reference + &"\n";
-        }
-
-        out_string
-    }
+    /////////////////////////////
+    //     Debug search values //
+    /////////////////////////////
+    // pub fn to_string(&self) -> String {
+    //     let mut out_string: String = String::new();
+    //     out_string = out_string.to_owned() + &"  unique name: " + &self.id_get() + &"\n";
+    //     out_string = out_string.to_owned() + &"  title: " + &self.title_get() + &"\n";
+    //     out_string = out_string.to_owned() + &"  tags: \n";
+    //     for tag in &self.tags_get() {
+    //         out_string = out_string.to_owned() + &"    " + &tag + &"\n";
+    //     }
+    //     out_string = out_string.to_owned() + &"  description: " + &self.description_get() + &"\n";
+    //     out_string = out_string.to_owned() + &"  references: \n";
+    //     for reference in &self.reference_get() {
+    //         out_string = out_string.to_owned() + &"    " + &reference + &"\n";
+    //     }
+    //
+    //     out_string
+    // }
 
     pub fn similarities(in_value: &Vec<String>, in_query: &Vec<String>) -> f32 {
         let word_regex = Regex::new(r"\b(\w+)\b").unwrap();
