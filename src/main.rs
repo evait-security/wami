@@ -4,14 +4,14 @@ mod search;
 mod yaml_template;
 
 use clap::{App, Arg};
+use colored::Colorize;
 
 fn main() {
-
     // Define the command-line arguments using clap
-    let matches = App::new("WAMI - What am I")
-        .version("0.1.0")
-        .author("evait security GmbH")
-        .about("WAMI is a user-friendly tool designed in Rust language, powered by Cargo, to assist individuals who struggle with remembering the names of the various programs they utilize. This open-source program aims to simplify the process of finding the most suitable programs for specific tasks.")
+    let matches = App::new(format!("{} - What am I", "WAMI".bold().green()))
+        .version("\tVersion: 0.1.0\n")
+        .author("evait security GmbH\nNxtTAB <wami@evait.de>\n\n")
+        .about(&*format!("{} is a user-friendly tool designed in Rust, powered by Cargo, to assist individuals who struggle with remembering the names of the various programs they utilize. This open-source program aims to simplify the process of finding the most suitable programs for specific tasks.\n\nCreated at 10.07.2023", "WAMI".bold().green()))
         .arg(
             Arg::with_name("search-all")
                 .short("s")
@@ -93,8 +93,6 @@ fn main() {
                 .required(false)
                 .multiple(false)
         )
-        .author("NxtTAB <wami@evait.de>")
-        .about("Created at 10.07.2023")
         .get_matches();
     
     let mut search: search::Search = search::Search::new_empty();

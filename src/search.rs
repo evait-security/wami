@@ -70,6 +70,7 @@ impl Search {
     pub fn reference_set(&mut self, in_reference: Vec<String>) {
         self.references = in_reference.to_owned();
     }
+    
     /////////////////////////////
     //     Debug search values //
     /////////////////////////////
