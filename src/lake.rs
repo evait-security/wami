@@ -1,7 +1,7 @@
 use crate::{template::Template, yaml_template, search::Search};
 use std::{fs::{self, File}, process, io::{self, Read}};
 use reqwest::Client;
-use tokio::{fs::create_dir_all};
+use tokio::fs::create_dir_all;
 use url::Url;
 use zip::ZipArchive;
 
@@ -26,11 +26,13 @@ pub struct Lake {
 impl Lake {
     
     // Setting the default path of the lake.
-    pub fn default( 
+    pub fn default(
+        in_update: bool, 
         in_search: Search    
     ) -> Lake {
         Lake::new(
             "https://github.com/evait-security/wami-templates/archive/refs/heads/main.zip",
+            in_update,
             in_search
         )
     }
@@ -38,9 +40,16 @@ impl Lake {
     // Initializing the lake.
     pub fn new(
         in_url: &str,
+        in_update: bool,
         in_search: Search
     ) -> Lake {
         let temp_dir: String = Lake::dir_extract(in_url);
+        if in_update {
+            match fs::remove_dir_all(temp_dir.to_owned()) {
+                Ok(()) => println!("Directory deleted successfully."),
+                Err(err) => eprintln!("Failed to delete directory: {}", err),
+            }
+        }
         if !Lake::dir_exists(temp_dir.to_owned()) {
             // Loading the lake from the URL.
             tokio::runtime::Runtime::new().unwrap().block_on(async {
@@ -56,7 +65,7 @@ impl Lake {
         }
     }
 
-    pub fn print_top_hits(&mut self, how_many_max: usize){
+        pub fn print_top_hits(&mut self, how_many_max: usize){
         // Sort the vector in descending order based on distance.
         let _ = &self.templates.sort_by(|a, b| b.distance().partial_cmp(&a.distance()).unwrap());
 

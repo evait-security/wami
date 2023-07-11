@@ -1,6 +1,6 @@
 mod lake;
-mod template;
 mod search;
+mod template;
 mod yaml_template;
 
 use clap::{App, Arg};
@@ -23,7 +23,7 @@ fn main() {
         )
         .arg(
             Arg::with_name("search-unique-name")
-                .short("u")
+                .short("n")
                 .long("search-unique-name")
                 .value_name("SEARCH_UNIQUE_NAME")
                 .help("This will search throw all the unique names with the values of SEARCH_UNIQUE_NAME.")
@@ -76,6 +76,16 @@ fn main() {
                 .multiple(false)
         )
         .arg(
+            Arg::with_name("update")
+                .short("u")
+                .long("update")
+                .value_name("UPDATE")
+                .help("Make an update of the lake.")
+                .required(false)
+                .multiple(false)
+                .takes_value(false)
+        )
+        .arg(
             Arg::with_name("max")
                 .short("M")
                 .long("max")
@@ -94,25 +104,25 @@ fn main() {
                 .multiple(false)
         )
         .get_matches();
-    
+
     let mut search: search::Search = search::Search::new_empty();
 
     if let Some(search_names) = matches.values_of("search-all") {
         let in_search_all_string: String = search_names.clone().collect::<Vec<_>>().join(" ");
         search.id_set(in_search_all_string.to_owned());
         search.title_set(in_search_all_string.to_owned());
-    
+
         let mut tag_vec = search.tags_get().to_owned();
         tag_vec.push(search_names.clone().collect::<Vec<_>>().join(" "));
         search.tags_set(tag_vec);
-    
+
         search.description_set(in_search_all_string.to_owned());
-    
+
         let mut reference_vec = search.reference_get().to_owned();
         reference_vec.push(search_names.clone().collect::<Vec<_>>().join(" "));
-        search.reference_set(reference_vec);    
+        search.reference_set(reference_vec);
     }
-    
+
     if let Some(search_names) = matches.values_of("search-unique-name") {
         let in_search_unique_name: String = search_names.collect::<Vec<_>>().join(" ");
         search.id_set(search.id_get() + &in_search_unique_name);
@@ -145,16 +155,19 @@ fn main() {
     }
 
     let mut lake: lake::Lake;
+    let mut update = false;
+    if let Some(_search_name) = matches.values_of("update") {
+        update = true;
+        // lake::Lake::update();
+    }
 
-    if let Some(url) = matches.values_of("url").and_then(|mut values| values.next()) {
-        lake = lake::Lake::new(
-            url,
-             search
-        );
+    if let Some(url) = matches
+        .values_of("url")
+        .and_then(|mut values| values.next())
+    {
+        lake = lake::Lake::new(url,update, search);
     } else {
-        lake = lake::Lake::default(
-            search
-        );
+        lake = lake::Lake::default(update,search);
     }
 
     let mut max_list = 10;
@@ -170,12 +183,11 @@ fn main() {
                 println!("Failed to parse the max value please enter a vialed number.");
             }
         }
-    } 
+    }
 
     if matches.is_present("show-all") {
         lake.print_top_hits(max_list);
     } else {
         lake.print_top_short_list(max_list);
     }
-
 }
