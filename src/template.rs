@@ -125,7 +125,7 @@ impl Template {
         for (index, reference) in self.references.iter().enumerate() {
             out_string.push_str("    ");
             out_string.push_str(reference);
-            if index < reference_len {
+            if index < reference_len - 1 {
                 out_string.push_str("\n");
             }
         }
