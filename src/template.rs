@@ -15,7 +15,7 @@ impl Template {
 
     // Create a new Template an return it.
     // I am using the new method,
-    // because I will trance form the id and tags fields to the right form.
+    // because I will transform the id and tags fields to the right form.
     // and I will calculate the distance to the search string.
     pub fn new(
         in_id: String,
