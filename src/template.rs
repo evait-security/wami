@@ -98,10 +98,9 @@ impl Template {
 
     pub fn to_short_string(&self) -> String {
         let mut out_string: String = String::new();
-        out_string.push_str(&self.id);
-        out_string.push_str(": ");
         out_string.push_str(&self.title);
-
+        out_string.push_str("\n");
+        out_string.push_str(&self.references_to_string());
         out_string.to_owned()
     }
 
