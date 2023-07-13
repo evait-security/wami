@@ -2,11 +2,13 @@ mod lake;
 mod search;
 mod template;
 mod yaml_template;
+mod config;
 
 use clap::{App, Arg};
 use colored::Colorize;
 
 fn main() {
+
     // Define the command-line arguments using clap
     let matches = App::new(format!("{} - What am I", "WAMI".bold().green()))
         .version("\tVersion: 0.1.0\n")
@@ -105,8 +107,10 @@ fn main() {
         )
         .get_matches();
 
+    // using the search struct do define the search parameters.
     let mut search: search::Search = search::Search::new_empty();
 
+    // Is search all set?
     if let Some(search_names) = matches.values_of("search-all") {
         let in_search_all_string: String = search_names.clone().collect::<Vec<_>>().join(" ");
         search.id_set(in_search_all_string.to_owned());
@@ -123,16 +127,19 @@ fn main() {
         search.reference_set(reference_vec);
     }
 
+    // Is search unique names set?
     if let Some(search_names) = matches.values_of("search-unique-name") {
         let in_search_unique_name: String = search_names.collect::<Vec<_>>().join(" ");
         search.id_set(search.id_get() + &in_search_unique_name);
     }
 
+    // Is search title set?
     if let Some(search_names) = matches.values_of("search-title") {
         let in_search_title: String = search_names.collect::<Vec<_>>().join(" ");
         search.title_set(search.title_get() + &in_search_title);
     }
 
+    // Is search tags set?
     if let Some(search_names) = matches.values_of("search-tags") {
         let in_search_tags: Vec<String> = search_names.map(String::from).collect();
         let mut tags: Vec<String> = search.tags_get();
@@ -140,11 +147,13 @@ fn main() {
         search.tags_set(tags);
     }
 
+    // Is search description set?
     if let Some(search_names) = matches.values_of("search-description") {
         let in_search_description: String = search_names.collect::<Vec<_>>().join(" ");
         search.description_set(search.description_get() + &in_search_description);
     }
 
+    // Is search reference set?
     if let Some(search_names) = matches.values_of("search-references") {
         let in_search_references: String = search_names.collect::<Vec<_>>().join(" ");
         let mut in_search_references_vec: Vec<String> = Vec::<String>::new();
@@ -156,22 +165,28 @@ fn main() {
 
     let mut lake: lake::Lake;
     let mut update = false;
+    
+    // If the update flag is set, set update.
     if let Some(_search_name) = matches.values_of("update") {
         update = true;
-        // lake::Lake::update();
     }
 
-    if let Some(url) = matches
+    let mut url: String = "".to_string();
+
+    // Is the url set?
+    if let Some(in_url) = matches
         .values_of("url")
         .and_then(|mut values| values.next())
-    {
-        lake = lake::Lake::new(url,update, search);
-    } else {
-        lake = lake::Lake::default(update,search);
+    {        
+        url = in_url.to_string();
     }
 
+    lake = lake::Lake::new(url, update, search);
+
+    // Set the default value of the maximum of elements to list.
     let mut max_list = 10;
 
+    // Is the max value set?
     if let Some(search_names) = matches.value_of("max") {
         let result: Result<usize, _> = search_names.parse();
         match result {
@@ -185,6 +200,7 @@ fn main() {
         }
     }
 
+    // Is show-all set or will we print the short_list.
     if matches.is_present("show-all") {
         lake.print_top_hits(max_list);
     } else {

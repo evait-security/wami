@@ -1,8 +1,7 @@
-use crate::{template::Template, yaml_template, search::Search};
-use std::{fs::{self, File}, process, io::{self, Read}};
+use crate::{template::Template, yaml_template, search::Search, config::Config};
+use std::{fs::{self, File}, io::{self, Read}, path::PathBuf};
 use reqwest::Client;
 use tokio::fs::create_dir_all;
-use url::Url;
 use zip::ZipArchive;
 
 #[derive(Debug)]
@@ -19,54 +18,51 @@ impl std::fmt::Display for MyError {
 impl std::error::Error for MyError {}
 
 pub struct Lake {
-    _url: String,
+    _config: Config,
     templates: Vec<Template>,
 }
 
 impl Lake {
-    
-    // Setting the default path of the lake.
-    pub fn default(
-        in_update: bool, 
-        in_search: Search    
-    ) -> Lake {
-        Lake::new(
-            "https://github.com/evait-security/wami-templates/archive/refs/heads/main.zip",
-            in_update,
-            in_search
-        )
-    }
-    
+   
     // Initializing the lake.
     pub fn new(
-        in_url: &str,
+        in_url: String,
         in_update: bool,
         in_search: Search
     ) -> Lake {
-        let temp_dir: String = Lake::dir_extract(in_url);
-        if in_update {
-            match fs::remove_dir_all(temp_dir.to_owned()) {
-                Ok(()) => println!("Directory deleted successfully."),
-                Err(err) => eprintln!("Failed to delete directory: {}", err),
-            }
+        let mut out_config: Config = Config::new();
+        
+        // If in_url is not empty, del the lake dir and set the config url to in_url.
+        if in_url != "" {
+            out_config.del_lake_dir();
+            out_config.set_new_url(in_url.to_owned());
         }
-        if !Lake::dir_exists(temp_dir.to_owned()) {
-            // Loading the lake from the URL.
+
+        // If in_update is set to true, then delete the lake folder.
+        if in_update {
+            out_config.del_lake_dir();
+        }
+        
+        // If the ~/.config/wami/dir_to_lake is not set then load it from the url.
+        if !Config::is_dir_present(out_config.get_lake_dir()){
             tokio::runtime::Runtime::new().unwrap().block_on(async {
-                Lake::load_from_url(&in_url).await.unwrap();
+                Lake::load_zip_from_url(&out_config).await
+                    .expect("Failed to load zip at lake::Lake::new");
             });
         }
+        
+        // Creating the lake struct.
         Lake { 
-            _url: in_url.to_owned(),
-            templates: Lake::load_the_lake_from_dir(
-                temp_dir,
+            _config: out_config.clone(),
+            templates: Lake::load_lake_from_config_dir(
+                out_config,
                 in_search
             )
         }
     }
 
-        pub fn print_top_hits(&mut self, how_many_max: usize){
-        // Sort the vector in descending order based on distance.
+    // Sort the vector in descending order based on distance.
+    pub fn print_top_hits(&mut self, how_many_max: usize){
         let _ = &self.templates.sort_by(|a, b| b.distance().partial_cmp(&a.distance()).unwrap());
 
         // Take as many we want form the top of the sorted templates.
@@ -78,8 +74,8 @@ impl Lake {
         }
     }
 
+    // Sort the vector in descending order based on distance.
     pub fn print_top_short_list(&mut self, how_many_max: usize){
-        // Sort the vector in descending order based on distance.
         let _ = &self.templates.sort_by(|a, b| b.distance().partial_cmp(&a.distance()).unwrap());
 
         // Take as many we want form the top of the sorted templates.
@@ -91,9 +87,16 @@ impl Lake {
         }
     }
 
+    // Read the yaml file in the given path.
     fn read_yaml_file(file_path: &str) -> Result<String, io::Error> {
+        
+        // Open the file
         let mut file = File::open(file_path)?;
+        
+        // Creating string for the content.
         let mut contents = String::new();
+
+        // Try to read the file content.
         match file.read_to_string(&mut contents) {
             Ok(_) => {
                 Ok(contents)
@@ -105,14 +108,15 @@ impl Lake {
         }
     }
     
-    fn load_the_lake_from_dir(
-        in_dir_path: String,
+    // Load the lake using the config struct.
+    fn load_lake_from_config_dir(
+        in_config: Config,
         in_search: Search
     ) -> Vec<Template>{
         let mut out_templates: Vec<Template> = Vec::<Template>::new();
                 
         // Trying to load the dir.
-        match fs::read_dir(in_dir_path){
+        match fs::read_dir(in_config.get_lake_dir()){
             Ok(entries) => {
                 for entry in entries {
                     if let Ok(entry) = entry {
@@ -133,7 +137,6 @@ impl Lake {
                                             serde_yaml::from_str(&yaml_string)
                                             .expect("Failed to deserialize YAML");
                                         
-                                        // println!("Name: {:#?}", in_template );
                                         // Use the new operator because there is an string formatting function integrated.
                                         // If you would use the deserializing method, it would be easier but maybe not correct.
                                         out_templates.push(Template::new(
@@ -169,16 +172,17 @@ impl Lake {
         }
     }
 
-    pub async fn load_from_url(url: &str) -> Result<(), Box<dyn std::error::Error>> {
+    // Loading the zip file from the url, using the config struct.
+    pub async fn load_zip_from_url(in_config: &Config) -> Result<(), Box<dyn std::error::Error>> {
 
         let client = Client::new();
     
         // Send a request to get the zip.
-        let response = client.get(url).send().await?;
+        let response = client.get(in_config.url.to_owned()).send().await?;
         
         // If this request fails, the return an error.
         if !response.status().is_success() {
-            return Err("Failed to fetch the zip file".into());
+            return Err("Failed to fetch the zip file at Lake::load_zip_form_url".into());
         }
 
         // If the request is ok read the bytes in the archive
@@ -186,12 +190,16 @@ impl Lake {
         let reader = std::io::Cursor::new(bytes);
         let mut archive = ZipArchive::new(reader)?;
     
+        // loop throw the archive
         for i in 0..archive.len() {
             
-            // loop throw the archive
+            // Get the file with the index.
             let mut file = archive.by_index(i)?;
-            let out_path = file.mangled_name();
-    
+
+            // configure the path to save the files.
+            let mut out_path: PathBuf = Config::get_config_path().to_owned();
+            out_path.push(file.mangled_name());
+            
             // If the file is an directory
             if file.name().ends_with('/') {
                 
@@ -214,54 +222,5 @@ impl Lake {
             }
         }
         Ok(())
-    }
-
-    fn dir_exists(in_dir: String) -> bool {
-
-        // Check if the path exists.
-        match fs::metadata(in_dir.to_owned()){
-            Ok(metadata) => {
-                if metadata.is_dir() {
-                    
-                    // The dir is there, we will read it.
-                    return true
-                } else {
-                                        
-                    // Error there is a problem with the dir path,
-                    // maybe there is a file that has the same name as the dir path.
-                    // I will not delete it, because I do not now for what that file is.
-                    // Maybe there are no user rights and I am not able to read at the path.
-                    // I will print out the the dir path, so there is an possibility to find the error.
-                    eprintln!("Error Path is not a dir: {}", in_dir);
-                    eprintln!("Try to delete the file with the same name or add the needed rights to write.");
-                    
-                    let error_code = 1;
-                    process::exit(error_code);
-                }
-            }
-            Err(_) => {       
-              
-                // The dir is not there, we will load its from the URL and then we will read it.
-                return false
-            }
-        }
-    }
-
-    fn dir_extract(in_url: &str) -> String {
-        
-        // Extract the path segments
-        let parsed_url = Url::parse(&in_url).expect("Failed to parse URL");
-        
-        // Create segments out of the url
-        let url_segments: Vec<_> = parsed_url.path_segments().unwrap().collect();
-
-        // Get the repository name form the segment
-        let repository = url_segments[1];
-
-        // Get the branch name form the segment
-        let branch = url_segments[5].strip_suffix(".zip").unwrap_or(url_segments[5]);
-        
-        // Create the path name
-        repository.to_owned() + "-" + branch + "/lake/"
     }
 }
