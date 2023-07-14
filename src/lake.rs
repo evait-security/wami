@@ -34,18 +34,22 @@ impl Lake {
         let mut out_config: Config = Config::new();
         
         // If in_url is not empty, del the lake dir and set the config url to in_url.
+        // Then do a reload of the config struct.
         if in_url != "" {
             out_config.del_lake_dir();
             out_config.set_new_url(in_url.to_owned());
             out_config.hash = "".to_string();
             Config::save_to_config_yaml(&out_config.url, &out_config.hash);
+            out_config = Config::new();
         }
 
         // If in_update is set to true, then delete the lake folder.
+        // Then do a reload of the config struct.
         if in_update {
             out_config.del_lake_dir();
             out_config.hash = "".to_string();
             Config::save_to_config_yaml(&out_config.url, &out_config.hash);
+            out_config = Config::new();
         }
         
         // If the ~/.config/wami/dir_to_lake is not set then load it from the url.
@@ -55,10 +59,6 @@ impl Lake {
                     .expect("Failed to load zip at lake::Lake::new");
             });
         }
-
-
-
-
         
         // Creating the lake struct.
         Lake { 
