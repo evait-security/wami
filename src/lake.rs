@@ -1,4 +1,5 @@
 use crate::{template::Template, yaml_template, search::Search, config::Config};
+use sha2::{Sha256, Digest};
 use std::{fs::{self, File}, io::{self, Read}, path::PathBuf};
 use reqwest::Client;
 use tokio::fs::create_dir_all;
@@ -36,11 +37,15 @@ impl Lake {
         if in_url != "" {
             out_config.del_lake_dir();
             out_config.set_new_url(in_url.to_owned());
+            out_config.hash = "".to_string();
+            Config::save_to_config_yaml(&out_config.url, &out_config.hash);
         }
 
         // If in_update is set to true, then delete the lake folder.
         if in_update {
             out_config.del_lake_dir();
+            out_config.hash = "".to_string();
+            Config::save_to_config_yaml(&out_config.url, &out_config.hash);
         }
         
         // If the ~/.config/wami/dir_to_lake is not set then load it from the url.
@@ -50,6 +55,10 @@ impl Lake {
                     .expect("Failed to load zip at lake::Lake::new");
             });
         }
+
+
+
+
         
         // Creating the lake struct.
         Lake { 
@@ -61,7 +70,7 @@ impl Lake {
         }
     }
 
-    // Sort the vector in descending order based on distance.
+    // Sort the template vector in descending order based on distance.
     pub fn print_top_hits(&mut self, how_many_max: usize){
         let _ = &self.templates.sort_by(|a, b| b.distance().partial_cmp(&a.distance()).unwrap());
 
@@ -74,7 +83,7 @@ impl Lake {
         }
     }
 
-    // Sort the vector in descending order based on distance.
+    // Sort the template vector in descending order based on distance.
     pub fn print_top_short_list(&mut self, how_many_max: usize){
         let _ = &self.templates.sort_by(|a, b| b.distance().partial_cmp(&a.distance()).unwrap());
 
@@ -161,6 +170,13 @@ impl Lake {
                         }
                     }
                 }
+
+                // Check for updates.
+                tokio::runtime::Runtime::new().unwrap().block_on(async {
+                    Lake::get_zip_hash_of_url_lake(&in_config).await
+                        .expect("Failed to load zip at lake::Lake::new");
+                });
+
                 out_templates
             }
 
@@ -186,7 +202,13 @@ impl Lake {
         }
 
         // If the request is ok read the bytes in the archive
-        let bytes = response.bytes().await?;    
+        let bytes = response.bytes().await?;
+
+        // Generate the hash for the config.yaml file.
+        let hash = Sha256::digest(&bytes);
+        let hash_hex = format!("{:x}", hash);
+        Config::save_to_config_yaml(&in_config.url, &hash_hex);
+
         let reader = std::io::Cursor::new(bytes);
         let mut archive = ZipArchive::new(reader)?;
     
@@ -222,5 +244,35 @@ impl Lake {
             }
         }
         Ok(())
+    }
+
+    // Create the hash of the zip file from the given url
+    // and print information to the user if the hash is different to the saved hash.
+    pub async fn get_zip_hash_of_url_lake(in_config: &Config)
+     -> Result<String, Box<dyn std::error::Error>> {
+        let client = Client::new();
+    
+        // Send a request to get the zip.
+        let response = client.get(in_config.url.to_owned()).send().await?;
+        
+        // If this request fails, the return an error.
+        if !response.status().is_success() {
+            return Err("Failed to fetch the zip file at Lake::load_zip_form_url".into());
+        }
+
+        // If the request is ok read the bytes in the archive
+        let bytes = response.bytes().await?;
+
+        // Generate the hash for the config.yaml file.
+        let hash = Sha256::digest(&bytes);
+        let hash_hex = format!("{:x}", hash);
+        
+        if in_config.hash != hash_hex && in_config.hash != ""{
+            println!("There is an new update of the lake.");
+            println!("Url: {}", in_config.url);
+            println!("Use: wami -u\n\tThis will update the lake.")
+        }
+
+        Ok(hash_hex)
     }
 }
