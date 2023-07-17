@@ -15,6 +15,12 @@ fn main() {
         .author("evait security GmbH\nNxtTAB <wami@evait.de>\n\n")
         .about(&*format!("{} is a user-friendly tool designed in Rust, powered by Cargo, to assist individuals who struggle with remembering the names of the various programs they utilize. This open-source program aims to simplify the process of finding the most suitable programs for specific tasks.\n\nCreated at 10.07.2023", "WAMI".bold().green()))
         .arg(
+            Arg::with_name("strings")
+                .value_name("STRING")
+                .required(true)
+                .multiple(true),
+        )
+        .arg(
             Arg::with_name("search-all")
                 .short("s")
                 .long("search-all")
@@ -110,6 +116,16 @@ fn main() {
     // using the search struct do define the search parameters.
     let mut search: search::Search = search::Search::new_empty();
 
+    
+    // Is default search set by entering just strings, then we will lock for tags
+    if let Some(search_names)= matches.values_of("strings") {
+        let in_search_tags: Vec<String> = search_names.map(String::from).collect();
+        let mut tags: Vec<String> = search.tags_get();
+        tags.extend(in_search_tags);
+        search.tags_set(tags);
+        println!("This is on");
+    }
+    
     // Is search all set?
     if let Some(search_names) = matches.values_of("search-all") {
         let in_search_all_string: String = search_names.clone().collect::<Vec<_>>().join(" ");
@@ -162,6 +178,12 @@ fn main() {
         references.extend(in_search_references_vec);
         search.reference_set(references);
     }
+
+    println!("The search value: {}", search.id_get());
+    println!("The search value: {}", search.title_get());
+    println!("The search value: {:#?}", search.tags_get());
+    println!("The search value: {}", search.description_get());
+    println!("The search value: {:#?}", search.reference_get());
 
     let mut lake: lake::Lake;
     let mut update = false;
