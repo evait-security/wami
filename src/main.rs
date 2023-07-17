@@ -123,7 +123,6 @@ fn main() {
         let mut tags: Vec<String> = search.tags_get();
         tags.extend(in_search_tags);
         search.tags_set(tags);
-        println!("This is on");
     }
     
     // Is search all set?
@@ -178,12 +177,6 @@ fn main() {
         references.extend(in_search_references_vec);
         search.reference_set(references);
     }
-
-    println!("The search value: {}", search.id_get());
-    println!("The search value: {}", search.title_get());
-    println!("The search value: {:#?}", search.tags_get());
-    println!("The search value: {}", search.description_get());
-    println!("The search value: {:#?}", search.reference_get());
 
     let mut lake: lake::Lake;
     let mut update = false;
