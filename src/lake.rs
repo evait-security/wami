@@ -143,28 +143,35 @@ impl Lake {
                                 // Try to read the yaml file
                                 match Lake::read_yaml_file(path.to_str().unwrap()){
                                     Ok(yaml_string) =>{
-                                        let in_yaml_template: yaml_template::YamlTemplate = 
-                                            serde_yaml::from_str(&yaml_string)
-                                            .expect("Failed to deserialize YAML");
-                                        
-                                        // Use the new operator because there is an string formatting function integrated.
-                                        // If you would use the deserializing method, it would be easier but maybe not correct.
-                                        out_templates.push(Template::new(
-                                            in_yaml_template.id,
-                                            in_search.id_get(),
-                                            in_yaml_template.title,
-                                            in_search.title_get(),
-                                            in_yaml_template.tags,
-                                            in_search.tags_get(),
-                                            in_yaml_template.description,
-                                            in_search.description_get(),
-                                            in_yaml_template.references,
-                                            in_search.reference_get()
-                                        ));
+                                        match serde_yaml::from_str::<yaml_template::YamlTemplate>(&yaml_string) {
+                                            Ok(in_yaml_template) => {
+                                                                                                
+                                                // Use the new operator because there is an string formatting function integrated.
+                                                // If you would use the deserializing method, it would be easier but maybe not correct.
+                                                out_templates.push(Template::new(
+                                                    in_yaml_template.id,
+                                                    in_search.id_get(),
+                                                    in_yaml_template.title,
+                                                    in_search.title_get(),
+                                                    in_yaml_template.tags,
+                                                    in_search.tags_get(),
+                                                    in_yaml_template.description,
+                                                    in_search.description_get(),
+                                                    in_yaml_template.references,
+                                                    in_search.reference_get()
+                                                ));
+                                            }
+                                            Err(err) => {
+                                                eprintln!("Failed to deserialize YAML: {}", err);
+                                                eprintln!("{:#?}", path.to_str().unwrap());
+                                                continue; // Skip this file and continue.
+                                            }
+                                        }
                                     }
                                     Err(err) => {
                                         eprintln!("Failed to read file: {}", err);
                                         eprintln!("{:#?}", path.to_str().unwrap());
+                                        continue; // Skip this file and continue.
                                     }
                                 }
                             }
