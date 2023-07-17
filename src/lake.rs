@@ -188,6 +188,16 @@ impl Lake {
 
         let client = Client::new();
     
+        // Check if we can connect to the url.
+        if !Lake::check_connection_to_url(in_config.url.to_owned()).await {
+            println!("{}", 
+                format!("{}",
+                     "Can not download the lake, the connection to the url is failing.".bold().red()
+                )
+            );
+            return Ok(());
+        }
+
         // Send a request to get the zip.
         let response = client.get(in_config.url.to_owned()).send().await?;
         
