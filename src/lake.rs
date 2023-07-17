@@ -1,9 +1,10 @@
 use crate::{template::Template, yaml_template, search::Search, config::Config};
 use sha2::{Sha256, Digest};
-use std::{fs::{self, File}, io::{self, Read}, path::PathBuf, str::Bytes};
+use std::{fs::{self, File}, io::{self, Read}, path::PathBuf, /*str::Bytes*/};
 use reqwest::Client;
 use tokio::fs::create_dir_all;
 use zip::ZipArchive;
+use colored::Colorize;
 
 #[derive(Debug)]
 struct MyError {
@@ -171,12 +172,6 @@ impl Lake {
                     }
                 }
 
-                // Check for updates.
-                tokio::runtime::Runtime::new().unwrap().block_on(async {
-                    Lake::get_zip_hash_of_url_lake(&in_config).await
-                        .expect("Failed to load zip at lake::Lake::new");
-                });
-
                 out_templates
             }
 
@@ -268,9 +263,16 @@ impl Lake {
         let hash_hex = Lake::generate_hash(&bytes);
                 
         if in_config.hash != hash_hex && in_config.hash != ""{
-            println!("There is an new update of the lake.");
-            println!("Url: {}", in_config.url);
-            println!("Use: wami -u\n\tThis will update the lake.")
+            println!("{}", 
+                format!("{}",
+                     "There is an new update of the lake.".bold().red()
+                )
+            );
+            println!("Use: {}",
+                format!("{}",
+                    "wami -u".bold().green()
+                )
+            )
         }
 
         Ok(hash_hex)

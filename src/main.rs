@@ -206,4 +206,10 @@ fn main() {
     } else {
         lake.print_top_short_list(max_list);
     }
+
+    // Check for updates.
+    tokio::runtime::Runtime::new().unwrap().block_on(async {
+        lake::Lake::get_zip_hash_of_url_lake(&&config::Config::new()).await
+            .expect("Failed to load zip at lake::Lake::new");
+    });
 }
