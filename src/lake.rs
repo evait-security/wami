@@ -247,7 +247,16 @@ impl Lake {
     pub async fn get_zip_hash_of_url_lake(in_config: &Config)
      -> Result<String, Box<dyn std::error::Error>> {
         let client = Client::new();
-    
+        
+        if !Lake::check_connection_to_url(in_config.url.to_owned()).await {
+            println!("{}", 
+                format!("{}",
+                     "Can not check for updates the connection to the url is failing.".bold().red()
+                )
+            );
+            return Ok("".to_string());
+        }
+
         // Send a request to get the zip.
         let response = client.get(in_config.url.to_owned()).send().await?;
         
@@ -265,7 +274,7 @@ impl Lake {
         if in_config.hash != hash_hex && in_config.hash != ""{
             println!("{}", 
                 format!("{}",
-                     "There is an new update of the lake.".bold().red()
+                     "There is a new update.".bold().red()
                 )
             );
             println!("Use: {}",
@@ -283,5 +292,13 @@ impl Lake {
         let hash = Sha256::digest(in_data);
         let hash_hex = format!("{:x}", hash);
         hash_hex
+    }
+
+    // This will check if it is possible to connect to the url.
+    pub async fn check_connection_to_url(in_url: String) -> bool {
+        match reqwest::get(in_url).await {
+            Ok(response) => response.status().is_success(),
+            Err(_) => false,
+        }
     }
 }
