@@ -1,6 +1,6 @@
 use crate::{template::Template, yaml_template, search::Search, config::Config};
 use sha2::{Sha256, Digest};
-use std::{fs::{self, File}, io::{self, Read}, path::PathBuf};
+use std::{fs::{self, File}, io::{self, Read}, path::PathBuf, str::Bytes};
 use reqwest::Client;
 use tokio::fs::create_dir_all;
 use zip::ZipArchive;
@@ -44,7 +44,7 @@ impl Lake {
         }
 
         // If in_update is set to true, then delete the lake folder.
-        // Then do a reload of the config struct.
+        // and a reload the config struct.
         if in_update {
             out_config.del_lake_dir();
             out_config.hash = "".to_string();
@@ -205,8 +205,9 @@ impl Lake {
         let bytes = response.bytes().await?;
 
         // Generate the hash for the config.yaml file.
-        let hash = Sha256::digest(&bytes);
-        let hash_hex = format!("{:x}", hash);
+        let hash_hex = Lake::generate_hash(&bytes);
+
+        // Save the url and hash in the config.yaml
         Config::save_to_config_yaml(&in_config.url, &hash_hex);
 
         let reader = std::io::Cursor::new(bytes);
@@ -262,11 +263,10 @@ impl Lake {
 
         // If the request is ok read the bytes in the archive
         let bytes = response.bytes().await?;
-
-        // Generate the hash for the config.yaml file.
-        let hash = Sha256::digest(&bytes);
-        let hash_hex = format!("{:x}", hash);
         
+        // Generate the hash for the config.yaml file.
+        let hash_hex = Lake::generate_hash(&bytes);
+                
         if in_config.hash != hash_hex && in_config.hash != ""{
             println!("There is an new update of the lake.");
             println!("Url: {}", in_config.url);
@@ -274,5 +274,12 @@ impl Lake {
         }
 
         Ok(hash_hex)
+    }
+    
+    pub fn generate_hash(in_data: &[u8]) -> String {
+    // Generate the hash for the config.yaml file.
+        let hash = Sha256::digest(in_data);
+        let hash_hex = format!("{:x}", hash);
+        hash_hex
     }
 }
