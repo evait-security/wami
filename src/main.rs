@@ -17,7 +17,7 @@ fn main() {
         .arg(
             Arg::with_name("strings")
                 .value_name("STRING")
-                .required(true)
+                .required(false)
                 .multiple(true),
         )
         .arg(

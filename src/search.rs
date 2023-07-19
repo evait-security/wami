@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 use regex::Regex;
-
+use levenshtein::levenshtein;
 use crate::template::Template;
 
 
@@ -71,26 +71,6 @@ impl Search {
         self.references = in_reference.to_owned();
     }
     
-    /////////////////////////////
-    //     Debug search values //
-    /////////////////////////////
-    // pub fn to_string(&self) -> String {
-    //     let mut out_string: String = String::new();
-    //     out_string = out_string.to_owned() + &"  unique name: " + &self.id_get() + &"\n";
-    //     out_string = out_string.to_owned() + &"  title: " + &self.title_get() + &"\n";
-    //     out_string = out_string.to_owned() + &"  tags: \n";
-    //     for tag in &self.tags_get() {
-    //         out_string = out_string.to_owned() + &"    " + &tag + &"\n";
-    //     }
-    //     out_string = out_string.to_owned() + &"  description: " + &self.description_get() + &"\n";
-    //     out_string = out_string.to_owned() + &"  references: \n";
-    //     for reference in &self.reference_get() {
-    //         out_string = out_string.to_owned() + &"    " + &reference + &"\n";
-    //     }
-    //
-    //     out_string
-    // }
-
     pub fn similarities(in_value: &Vec<String>, in_query: &Vec<String>) -> f32 {
         let word_regex = Regex::new(r"\b(\w+)\b").unwrap();
     
@@ -131,5 +111,231 @@ impl Search {
         let similarity = intersection as f32 / union as f32;
     
         similarity
+    }
+
+    pub fn calculate_similarity(word1: &str, word2: &str) -> f32 {
+        let distance = levenshtein(word1, word2) as f32;
+        let max_length = word1.len().max(word2.len()) as f32;
+
+        1.0 - (distance / max_length)
+    }
+
+    pub fn similarities_full(in_value: &Vec<String>, in_query: &Vec<String>) -> f32 {
+        let similarities_score = Search::similarities(in_value, in_query);
+        let calculate_similarity_score = in_value.iter().zip(in_query.iter())
+            .map(|(word1, word2)| Search::calculate_similarity(word1, word2))
+            .sum::<f32>() / in_value.len().max(in_query.len()) as f32;
+    
+        0.7 * similarities_score + 0.3 * calculate_similarity_score
+    }
+    
+    pub fn similarity_full(in_value: &str, in_query: &str) -> f32 {
+        let similarity_score = Search::similarity(in_value, in_query);
+        let calculate_similarity_score = Search::calculate_similarity(in_value, in_query);
+    
+        0.7 * similarity_score + 0.3 * calculate_similarity_score
+    }
+
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use regex::Regex;
+    use lazy_static::lazy_static;
+
+    lazy_static! {
+        static ref WORD_REGEX: Regex = Regex::new(r"\b(\w+)\b").unwrap();
+    }
+    
+    #[test]
+    fn test_search_new_empty() {
+        let search = Search::new_empty();
+        
+        assert_eq!(search.id, "");
+        assert_eq!(search.title, "");
+        assert_eq!(search.tags, Vec::<String>::new());
+        assert_eq!(search.description, "");
+        assert_eq!(search.references, Vec::<String>::new());
+    }
+    
+    #[test]
+    fn test_search_id_get() {
+        let mut search = Search::new_empty();
+        search.id = "template1".to_owned();
+        
+        assert_eq!(search.id_get(), "template1");
+    }
+    
+    #[test]
+    fn test_search_id_set() {
+        let mut search = Search::new_empty();
+        search.id_set("template1".to_owned());
+        
+        assert_eq!(search.id, "template1");
+    }
+    
+    #[test]
+    fn test_search_title_get() {
+        let mut search = Search::new_empty();
+        search.title = "Template 1".to_owned();
+        
+        assert_eq!(search.title_get(), "Template 1");
+    }
+    
+    #[test]
+    fn test_search_title_set() {
+        let mut search = Search::new_empty();
+        search.title_set("Template 1".to_owned());
+        
+        assert_eq!(search.title, "Template 1");
+    }
+    
+    #[test]
+    fn test_search_tags_get() {
+        let mut search = Search::new_empty();
+        search.tags = vec!["tag1".to_owned(), "tag2".to_owned()];
+        
+        assert_eq!(search.tags_get(), vec!["tag1", "tag2"]);
+    }
+    
+    #[test]
+    fn test_search_tags_set() {
+        let mut search = Search::new_empty();
+        search.tags_set(vec!["tag1".to_owned(), "tag2".to_owned()]);
+        
+        assert_eq!(search.tags, vec!["tag1", "tag2"]);
+    }
+    
+    #[test]
+    fn test_search_description_get() {
+        let mut search = Search::new_empty();
+        search.description = "This is a sample description.".to_owned();
+        
+        assert_eq!(search.description_get(), "This is a sample description.");
+    }
+    
+    #[test]
+    fn test_search_description_set() {
+        let mut search = Search::new_empty();
+        search.description_set("This is a sample description.".to_owned());
+        
+        assert_eq!(search.description, "This is a sample description.");
+    }
+    
+    #[test]
+    fn test_search_reference_get() {
+        let mut search = Search::new_empty();
+        search.references = vec!["https://example.com".to_owned()];
+        
+        assert_eq!(search.reference_get(), vec!["https://example.com"]);
+    }
+    
+    #[test]
+    fn test_search_reference_set() {
+        let mut search = Search::new_empty();
+        search.reference_set(vec!["https://example.com".to_owned()]);
+        
+        assert_eq!(search.references, vec!["https://example.com"]);
+    }
+    
+    #[test]
+    fn test_search_similarities() {
+        let value = vec!["This is a sample text.".to_owned()];
+        let query = vec!["sample text".to_owned()];
+
+        let words_value: HashSet<&str> = value
+            .iter()
+            .flat_map(|sentence| WORD_REGEX.captures_iter(sentence))
+            .map(|captures| captures.get(1).unwrap().as_str())
+            .collect();
+
+        let words_query: HashSet<&str> = query
+            .iter()
+            .flat_map(|sentence| WORD_REGEX.captures_iter(sentence))
+            .map(|captures| captures.get(1).unwrap().as_str())
+            .collect();
+
+        println!("Words in value: {:?}", words_value);
+        println!("Words in query: {:?}", words_query);
+
+        let intersection = words_value.intersection(&words_query).count();
+        let union = words_value.len() + words_query.len() - intersection;
+
+        println!("Intersection: {}", intersection);
+        println!("Union: {}", union);
+
+        let similarity = intersection as f32 / union as f32;
+
+        assert_eq!(similarity, 0.4);
+    }
+
+    #[test]
+    fn test_search_similarity() {
+        let value = "This is a sample text.";
+        let query = "sample text";
+
+        let words_value: HashSet<&str> = WORD_REGEX
+            .captures_iter(value)
+            .map(|captures| captures.get(1).unwrap().as_str())
+            .collect();
+
+        let words_query: HashSet<&str> = WORD_REGEX
+            .captures_iter(query)
+            .map(|captures| captures.get(1).unwrap().as_str())
+            .collect();
+
+        println!("Words in value: {:?}", words_value);
+        println!("Words in query: {:?}", words_query);
+
+        let intersection = words_value.intersection(&words_query).count();
+        let union = words_value.len() + words_query.len() - intersection;
+
+        println!("Intersection: {}", intersection);
+        println!("Union: {}", union);
+
+        let similarity = intersection as f32 / union as f32;
+
+        assert_eq!(similarity, 0.4);
+    }
+
+    #[test]
+    fn test_search_similarities_one_word() {
+        let value = "This";
+        let query = "That";
+
+        let similarity = Search::calculate_similarity(value, query);
+
+        assert_eq!(similarity, 0.5);
+    }
+
+    #[test]
+    fn test_search_similarity_one_word() {
+        let value = "This";
+        let query = "That";
+
+        let similarity = Search::calculate_similarity(value, query);
+
+        assert_eq!(similarity, 0.5);
+    }
+
+    #[test]
+    fn test_search_similarities_one_word_one_quarter() {
+        let value = "Tree";
+        let query = "That";
+
+        let similarity = Search::calculate_similarity(value, query);
+
+        assert_eq!(similarity, 0.25);
+    }
+
+    #[test]
+    fn test_search_similarity_one_word_one_quarter() {
+        let value = "Tree";
+        let query = "That";
+
+        let similarity = Search::calculate_similarity(value, query);
+
+        assert_eq!(similarity, 0.25);
     }
 }
