@@ -1,14 +1,13 @@
+mod config;
 mod lake;
 mod search;
 mod template;
 mod yaml_template;
-mod config;
 
 use clap::{App, Arg};
 use colored::Colorize;
 
 fn main() {
-
     // Define the command-line arguments using clap
     let matches = App::new(format!("{} - What am I", "WAMI".bold().green()))
         .version("\tVersion: 0.1.0\n")
@@ -113,18 +112,17 @@ fn main() {
         )
         .get_matches();
 
-    // using the search struct do define the search parameters.
+    // using the search struct to define the search parameters.
     let mut search: search::Search = search::Search::new_empty();
 
-    
     // Is default search set by entering just strings, then we will lock for tags
-    if let Some(search_names)= matches.values_of("strings") {
+    if let Some(search_names) = matches.values_of("strings") {
         let in_search_tags: Vec<String> = search_names.map(String::from).collect();
         let mut tags: Vec<String> = search.tags_get();
         tags.extend(in_search_tags);
         search.tags_set(tags);
     }
-    
+
     // Is search all set?
     if let Some(search_names) = matches.values_of("search-all") {
         let in_search_all_string: String = search_names.clone().collect::<Vec<_>>().join(" ");
@@ -178,9 +176,9 @@ fn main() {
         search.reference_set(references);
     }
 
-    let mut lake: lake::Lake;
+    // let mut lake_result: lake::Lake;
     let mut update = false;
-    
+
     // If the update flag is set, set update.
     if let Some(_search_name) = matches.values_of("update") {
         update = true;
@@ -192,13 +190,11 @@ fn main() {
     if let Some(in_url) = matches
         .values_of("url")
         .and_then(|mut values| values.next())
-    {        
+    {
         url = in_url.to_string();
     }
 
-    lake = lake::Lake::new(url, update, search);
-
-    // Set the default value of the maximum of elements to list.
+    // The defaul value of max item to list is 10.
     let mut max_list = 10;
 
     // Is the max value set?
@@ -210,21 +206,43 @@ fn main() {
             }
             Err(_) => {
                 // Parsing failed
-                println!("Failed to parse the max value please enter a vialed number.");
+                println!("Failed to parse the max value please enter a valid number.");
             }
         }
     }
 
-    // Is show-all set or will we print the short_list.
-    if matches.is_present("show-all") {
-        lake.print_top_hits(max_list);
-    } else {
-        lake.print_top_short_list(max_list);
+    // Create the lake an instance of the lake
+    // We have the url if it has changed
+    // We have the update boolen
+    // And we have all the search parameters
+    let lake_result = lake::Lake::new(url, update, search);
+
+    match lake_result {
+        Ok(mut lake) => {
+            // Now you have a valid Lake instance in the lake variable.
+            if matches.is_present("show-all") {
+                lake.print_top_hits(max_list);
+            } else {
+                lake.print_top_short_list(max_list);
+            }
+        }
+        Err(e) => {
+            println!("Failed to create the Lake: {}", e);
+            std::process::exit(1);
+        }
     }
 
     // Check for updates.
     tokio::runtime::Runtime::new().unwrap().block_on(async {
-        lake::Lake::get_zip_hash_of_url_lake(&&config::Config::new()).await
-            .expect("Failed to load zip at lake::Lake::new");
-    });
+        match config::Config::new() {
+            Ok(config) => {
+                lake::Lake::get_zip_hash_of_url_lake(&config)
+                    .await
+                    .expect("Failed to load zip at lake::Lake::new");
+            }
+            Err(e) => {
+                println!("Can not load check for updates: {}", e);
+            }
+        }
+    })
 }
