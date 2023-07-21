@@ -408,28 +408,7 @@ mod tests {
         let value = vec!["This is a sample text.".to_owned()];
         let query = vec!["sample text".to_owned()];
 
-        let words_value: HashSet<&str> = value
-            .iter()
-            .flat_map(|sentence| WORD_REGEX.captures_iter(sentence))
-            .map(|captures| captures.get(1).unwrap().as_str())
-            .collect();
-
-        let words_query: HashSet<&str> = query
-            .iter()
-            .flat_map(|sentence| WORD_REGEX.captures_iter(sentence))
-            .map(|captures| captures.get(1).unwrap().as_str())
-            .collect();
-
-        println!("Words in value: {:?}", words_value);
-        println!("Words in query: {:?}", words_query);
-
-        let intersection = words_value.intersection(&words_query).count();
-        let union = words_value.len() + words_query.len() - intersection;
-
-        println!("Intersection: {}", intersection);
-        println!("Union: {}", union);
-
-        let similarity = intersection as f32 / union as f32;
+        let similarity = Search::word_similarities(&value, &query);
 
         assert_eq!(similarity, 0.4);
     }
@@ -439,27 +418,8 @@ mod tests {
         let value = "This is a sample text.";
         let query = "sample text";
 
-        let words_value: HashSet<&str> = WORD_REGEX
-            .captures_iter(value)
-            .map(|captures| captures.get(1).unwrap().as_str())
-            .collect();
-
-        let words_query: HashSet<&str> = WORD_REGEX
-            .captures_iter(query)
-            .map(|captures| captures.get(1).unwrap().as_str())
-            .collect();
-
-        println!("Words in value: {:?}", words_value);
-        println!("Words in query: {:?}", words_query);
-
-        let intersection = words_value.intersection(&words_query).count();
-        let union = words_value.len() + words_query.len() - intersection;
-
-        println!("Intersection: {}", intersection);
-        println!("Union: {}", union);
-
-        let similarity = intersection as f32 / union as f32;
-
+        let similarity = Search::word_similarity(value, query);
+        
         assert_eq!(similarity, 0.4);
     }
 
@@ -599,16 +559,20 @@ mod tests {
             "This is a sample text.".to_owned(),
             "Another sentence.".to_owned(),
             "One more sentence.".to_owned(),
-            // Add more sentences here
+            "Lol this is some type of work.".to_owned(),
+            "To talk about this and that.".to_owned(),
+            "Do not read this, it is not good for you.".to_owned(),
         ];
         let query = vec![
             "sample text".to_owned(),
-            // Add more query sentences here
+            "This is a sample text.".to_owned(),
+            "Another sentence.".to_owned(),
+            "One more sentence.".to_owned(),
+            "And some other text".to_owned(),
+            "Why not like this.".to_owned()
         ];
 
         let similarity = Search::similarities_full(&value, &query);
-
-        // Perform appropriate assertion based on the expected similarity value.
 
         // Expected range of similarity.
         let expected_similarity_range = 0.0..=1.0;
