@@ -74,7 +74,14 @@ impl Config {
 
     // This is a setter function, for the url value of the struct.
     pub fn set_new_url(&mut self, in_url: String){
-        self.url = in_url;
+        if Url::parse(&in_url)
+            .map(|url| !url.path().contains(".."))
+            .unwrap_or(false)
+        {
+            self.url = in_url;
+        } else {
+            panic!{"Invalid URL: {}", in_url};
+        }
     }
 
     // This will return the path of the config.yaml file.
