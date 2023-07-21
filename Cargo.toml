@@ -9,6 +9,7 @@ repository = "https://github.com/evait-security/wami/"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+assert_approx_eq = "1.0.0"
 clap = "2.33.0"
 colored = "2.0.0"
 lazy_static = "1.4"
