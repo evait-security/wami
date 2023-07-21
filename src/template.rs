@@ -162,3 +162,102 @@ impl Template {
         out_string
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // Tests for the Template structure
+    #[test]
+    fn test_template_structure() {
+        let tags = vec!["tag1".to_string(), "tag2".to_string()];
+        let references = vec!["ref1".to_string(), "ref2".to_string()];
+        let search_vec: Vec<String> = vec!["search2".to_string(), "search3".to_string()];
+        let template = Template::new(
+            "id".to_string(),
+            "id_search".to_string(),
+            "title".to_string(),
+            "title_search".to_string(),
+            tags.clone(),
+            search_vec.clone(),
+            "description".to_string(),
+            "description_search".to_string(),
+            references.clone(),
+            search_vec.clone()
+        );
+        
+        assert_eq!(template.id, "id");
+        assert_eq!(template.title, "title");
+        assert_eq!(template.tags, tags);
+        assert_eq!(template.description, "description");
+        assert_eq!(template.references, references);
+    }
+
+    // Test for the new function
+    #[test]
+    fn test_new() {
+        let tags = vec!["tag1".to_string(), "tag2".to_string()];
+        let references = vec!["ref1".to_string(), "ref2".to_string()];
+        let search_vec: Vec<String> = vec!["search2".to_string(), "search3".to_string()];
+        let template = Template::new(
+            "Id".to_string(),
+            "id_search".to_string(),
+            "Title".to_string(),
+            "title_search".to_string(),
+            tags.clone(),
+            search_vec.clone(),
+            "Description".to_string(),
+            "description_search".to_string(),
+            references.clone(),
+            search_vec.clone()
+        );
+
+        // The id and tags should be in lowercase
+        assert_eq!(template.id, "id");
+        assert_eq!(template.title, "Title");
+        assert_eq!(template.tags, vec!["tag1", "tag2"]);
+        assert_eq!(template.description, "Description");
+        assert_eq!(template.references, vec!["ref1", "ref2"]);
+    }
+
+    // Tests for the to_string function
+    #[test]
+    fn test_to_string() {
+        let tags = vec!["tag1".to_string(), "tag2".to_string()];
+        let references = vec!["ref1".to_string(), "ref2".to_string()];
+        let template = Template::new(
+            "id".to_string(),
+            "id_search".to_string(),
+            "title".to_string(),
+            "title_search".to_string(),
+            tags.clone(),
+            tags.clone(),
+            "description".to_string(),
+            "description_search".to_string(),
+            references.clone(),
+            references.clone()
+        );
+
+        // Compare the template to string output with the expected output
+        let expected_output = "id\n  Name: title\n  Tags: tag1, tag2, \n  Description: description\n  References: \n    ref1\n    ref2\n";
+        assert_eq!(template.to_string(), expected_output);
+    }
+
+    // Test the function convert_to_lowercase_alphanumeric_with_hyphens
+    #[test]
+    fn test_convert_to_lowercase_alphanumeric_with_hyphens() {
+        let input_string = "Convert-ME)into*Lowercase!".to_string();
+        let expected_output = "convert-meintolowercase".to_string();
+
+        assert_eq!(Template::convert_to_lowercase_alphanumeric_with_hyphens(&input_string), expected_output);
+    }
+
+    // Test the function convert_tags_to_excepted_format
+    #[test]
+    fn test_convert_tags_to_excepted_format() {
+        let input_tags = vec!["ConvertME".to_string(), "Into-Lowercase!".to_string()];
+        let expected_output = vec!["convertme".to_string(), "into-lowercase".to_string()];
+
+        assert_eq!(Template::convert_tags_to_excepted_format(input_tags), expected_output);
+    }
+}
