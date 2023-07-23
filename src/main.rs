@@ -43,9 +43,7 @@ fn main() {
                 .long("search-title")
                 .value_name("SEARCH_TITLE")
                 .help("This will search throw all the title with the values of SEARCH_TITLE.")
-                .required(false)
-                .multiple(true)
-        )
+                .required(false) .multiple(true) )
         .arg(
             Arg::with_name("search-tags")
                 .short("g")
@@ -72,6 +70,15 @@ fn main() {
                 .help("This will search throw all the references with the values of SEARCH_REFERENCES.")
                 .required(false)
                 .multiple(true)
+        )
+        .arg(
+            Arg::with_name("sort")
+                .short("S")
+                .long("sort")
+                .value_name("SORT")
+                .help("This will determen the sorting direction asc or desc")
+                .required(false)
+                .multiple(false)
         )
         .arg(
             Arg::with_name("url")
@@ -194,9 +201,17 @@ fn main() {
         url = in_url.to_string();
     }
 
-    // The defaul value of max item to list is 10.
+    // The default value of max item to list is 10.
     let mut max_list = 10;
 
+    // In sort the default value for the sort value is asc
+    let mut _sort_value = "asc".to_string();
+
+    if let Some(sort) = matches
+        .value_of("sort")
+    {
+        _sort_value = sort.to_string();
+    }
     // Is the max value set?
     if let Some(search_names) = matches.value_of("max") {
         let result: Result<usize, _> = search_names.parse();
