@@ -88,7 +88,7 @@ impl Lake {
     }
 
     // Sort the template vector in descending order based on distance.
-    pub fn print_top_hits(&mut self, how_many_max: usize) {
+    pub fn print_top_hits(&mut self, how_many_max: usize, _in_sort_value: String) {
         let _ = &self
             .templates
             .sort_by(|a, b| b.distance().partial_cmp(&a.distance()).unwrap());
@@ -96,14 +96,26 @@ impl Lake {
         // Take as many we want form the top of the sorted templates.
         let max_hits_templates = &self.templates[..how_many_max.min(self.templates.len())];
 
-        for (index, template) in max_hits_templates.iter().enumerate() {
-            println!("Number: {}", index + 1);
-            println!("Program: {}", template.to_string());
+        // Out put in the desired order.
+        match _in_sort_value.as_str() {
+            "desc" => {
+                for (index, template) in max_hits_templates.iter().rev().enumerate() {
+                    let reverse_index = max_hits_templates.len() - index;
+                    println!("Number: {}", reverse_index);
+                    println!("Program: {}", template.to_string());
+                }
+            },
+            _ => {
+                for (index, template) in max_hits_templates.iter().enumerate() {
+                    println!("Number: {}", index + 1);
+                    println!("Program: {}", template.to_string());
+                }
+            }
         }
     }
 
     // Sort the template vector in descending order based on distance.
-    pub fn print_top_short_list(&mut self, how_many_max: usize) {
+    pub fn print_top_short_list(&mut self, how_many_max: usize, _in_sort_value: String) {
         let _ = &self
             .templates
             .sort_by(|a, b| b.distance().partial_cmp(&a.distance()).unwrap());
@@ -111,8 +123,18 @@ impl Lake {
         // Take as many we want form the top of the sorted templates.
         let max_hits_templates = &self.templates[..how_many_max.min(self.templates.len())];
 
-        for (index, template) in max_hits_templates.iter().enumerate() {
-            println!("{}: {}", index + 1, template.to_short_string());
+        match _in_sort_value.as_str() {
+            "desc" => {
+                for (index, template) in max_hits_templates.iter().rev().enumerate() {
+                    let reverse_index = max_hits_templates.len() - index;
+                    println!("{}: {}", reverse_index, template.to_short_string());
+                }
+            }
+            _ => {
+                for (index, template) in max_hits_templates.iter().enumerate() {
+                    println!("{}: {}", index + 1, template.to_short_string());
+                }
+            }
         }
     }
 

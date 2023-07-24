@@ -236,9 +236,9 @@ fn main() {
         Ok(mut lake) => {
             // Now you have a valid Lake instance in the lake variable.
             if matches.is_present("show-all") {
-                lake.print_top_hits(max_list);
+                lake.print_top_hits(max_list, _sort_value);
             } else {
-                lake.print_top_short_list(max_list);
+                lake.print_top_short_list(max_list, _sort_value);
             }
         }
         Err(e) => {
