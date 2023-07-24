@@ -205,12 +205,12 @@ fn main() {
     let mut max_list = 10;
 
     // In sort the default value for the sort value is asc
-    let mut _sort_value = "asc".to_string();
+    let mut sort_value = "asc".to_string();
 
     if let Some(sort) = matches
         .value_of("sort")
     {
-        _sort_value = sort.to_string();
+        sort_value = sort.to_string();
     }
     // Is the max value set?
     if let Some(search_names) = matches.value_of("max") {
@@ -236,9 +236,9 @@ fn main() {
         Ok(mut lake) => {
             // Now you have a valid Lake instance in the lake variable.
             if matches.is_present("show-all") {
-                lake.print_top_hits(max_list, _sort_value);
+                lake.print_top_hits(max_list, sort_value);
             } else {
-                lake.print_top_short_list(max_list, _sort_value);
+                lake.print_top_short_list(max_list, sort_value);
             }
         }
         Err(e) => {
