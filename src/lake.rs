@@ -288,51 +288,6 @@ impl Lake {
         Ok(())
     }
 
-    // // Create the hash of the zip file from the given url
-    // // and print information to the user if the hash is different to the saved hash.
-    // pub async fn get_zip_hash_of_url_lake(in_config: &Config)
-    //  -> Result<String, Box<dyn std::error::Error>> {
-    //     let client = Client::new();
-
-    //     if !Lake::check_connection_to_url(in_config.url.to_owned()).await {
-    //         println!("{}",
-    //             format!("{}",
-    //                  "Can not check for updates the connection to the url is failing.".bold().red()
-    //             )
-    //         );
-    //         return Ok("".to_string());
-    //     }
-
-    //     // Send a request to get the zip.
-    //     let response = client.get(in_config.url.to_owned()).send().await?;
-
-    //     // If this request fails, the return an error.
-    //     if !response.status().is_success() {
-    //         return Err("Failed to fetch the zip file at Lake::load_zip_form_url".into());
-    //     }
-
-    //     // If the request is ok read the bytes in the archive
-    //     let bytes = response.bytes().await?;
-
-    //     // Generate the hash for the config.yaml file.
-    //     let hash_hex = Lake::generate_hash(&bytes);
-
-    //     if in_config.hash != hash_hex && in_config.hash != ""{
-    //         println!("{}",
-    //             format!("{}",
-    //                  "There is a new update.".bold().red()
-    //             )
-    //         );
-    //         println!("Use: {}",
-    //             format!("{}",
-    //                 "wami -u".bold().green()
-    //             )
-    //         )
-    //     }
-
-    //     Ok(hash_hex)
-    // }
-
     // Create the hash of the zip file from the given url
     // and print information to the user if the hash is different to the saved hash.
     pub async fn get_zip_hash_of_url_lake(
@@ -373,13 +328,6 @@ impl Lake {
     }
 
     // This will check if it is possible to connect to the url.
-    // pub async fn check_connection_to_url(in_url: String) -> bool {
-    //     match reqwest::get(in_url).await {
-    //         Ok(response) => response.status().is_success(),
-    //         Err(_) => false,
-    //     }
-    // }
-
     pub async fn check_connection_to_url(in_url: String) -> Result<(), Box<dyn std::error::Error>> {
         match reqwest::get(&in_url).await {
             Ok(response) => {
