@@ -46,11 +46,6 @@ impl Lake {
             if let Err(e) = Config::save_to_config_yaml(&out_config.url, &out_config.hash) {
                 return Err(e);
             }
-
-            //match Config::save_to_config_yaml(&out_config.url, &out_config.hash) {
-            //    Ok(_) => Config::new(),
-            //    Err(e) => return Err(e),
-            //};
         }
 
         // If in_update is set to true, then delete the lake folder.
@@ -62,8 +57,6 @@ impl Lake {
                 return Err(e);
             }
             out_config = Config::new()?;
-            //Config::save_to_config_yaml(&out_config.url, &out_config.hash);
-            //out_config = Config::new()?;
         }
 
         // If the ~/.config/wami/dir_to_lake is not set then load it from the url.

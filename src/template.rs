@@ -133,19 +133,6 @@ impl Template {
         out_string
     }
 
-    // // Make the tags vec robust
-    // // Will make all tags uniform, this simplifies the search algorithmic.
-    // pub fn convert_tags_to_excepted_format(in_tags: Vec<String>) -> Vec<String> {
-    //     let mut out_tags: Vec<String> = Vec::<String>::new();
-    //     for tag in in_tags {
-    //         out_tags.push(
-    //             Template::convert_to_lowercase_alphanumeric_with_hyphens(&tag)
-    //         );
-    //     }
-
-    //     out_tags
-    // }
-
     // Make the tags vec robust
     // Will make all tags uniform, this simplifies the search algorithmic.    
     pub fn convert_tags_to_excepted_format(in_tags: &Vec<String>) -> Vec<String> {
