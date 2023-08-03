@@ -10,6 +10,7 @@ use std::collections::HashSet;
 // An value close to 1.0 will be the best vector.
 // An value close to 0.0 will be no match.
 // This is almost imposable, because some letters will match at some point.
+
 pub struct Search {
     id: String,
     title: String,
@@ -23,90 +24,94 @@ impl Search {
         Search {
             id: "".to_owned(),
             title: "".to_owned(),
-            tags: Vec::<String>::new(),
+            tags: Vec::new(),
             description: "".to_owned(),
-            references: Vec::<String>::new(),
+            references: Vec::new(),
         }
     }
-
-    pub fn id_get(&self) -> String {
-        self.id.to_owned()
+    
+    pub fn id_get(&self) -> &String {
+        &self.id
     }
 
-    pub fn id_set(&mut self, in_id: String) {
+    pub fn id_set(&mut self, in_id: &String) {
         self.id = Template::convert_to_lowercase_alphanumeric_with_hyphens(&in_id);
     }
 
-    pub fn title_get(&self) -> String {
-        self.title.to_owned()
+    pub fn title_get(&self) -> &str {
+        &self.title
     }
 
-    pub fn title_set(&mut self, in_title: String) {
-        self.title = in_title;
+    pub fn title_set(&mut self, in_title: &String) {
+        self.title = in_title.to_owned();
     }
 
-    pub fn tags_get(&self) -> Vec<String> {
-        self.tags.to_owned()
+    pub fn tags_get(&self) -> &Vec<String> {
+        &self.tags
     }
 
-    pub fn tags_set(&mut self, in_tags: Vec<String>) {
-        self.tags = Template::convert_tags_to_excepted_format(in_tags);
+    pub fn tags_set(&mut self, in_tags: &Vec<String>) {
+        self.tags = in_tags.to_owned();
     }
 
-    pub fn description_get(&self) -> String {
-        self.description.to_owned()
+    pub fn description_get(&self) -> &String {
+        &self.description
     }
 
-    pub fn description_set(&mut self, in_description: String) {
+    pub fn description_set(&mut self, in_description: &String) {
         self.description = in_description.to_owned();
     }
 
-    pub fn reference_get(&self) -> Vec<String> {
-        self.references.to_owned()
+    pub fn reference_get(&self) -> &Vec<String> {
+        &self.references
     }
 
-    pub fn reference_set(&mut self, in_reference: Vec<String>) {
+    pub fn reference_set(&mut self, in_reference: &Vec<String>) {
         self.references = in_reference.to_owned();
     }
 
-    pub fn word_similarities(in_value: &Vec<String>, in_query: &Vec<String>) -> f32 {
+    fn word_similarities(in_value: &[String], in_query: &[String]) -> f32 {
         in_value
             .iter()
-            .map(|sentence| Search::word_similarity(sentence, &in_query.join(" ")))
+            .map(|sentence| 
+                Search::word_similarity(
+                    &sentence, 
+                    &in_query
+                        .join(" ")
+                )
+            )
             .sum::<f32>()
             / in_value.len() as f32
     }
 
     pub fn word_similarity(in_value: &str, in_query: &str) -> f32 {
-        let answer = Search::are_values_empty(in_value, in_query);
-        if answer.0 {
-            return answer.1;
+        let (is_empty, similarity) = Search::are_values_empty(&in_value, &in_query);
+        if is_empty {
+            return similarity;
         }
 
         let word_regex = Regex::new(r"\b(\w+)\b").unwrap();
 
         let words_value: HashSet<&str> = word_regex
-            .captures_iter(in_value)
+            .captures_iter(&in_value)
             .map(|captures| captures.get(1).unwrap().as_str())
             .collect();
 
         let words_query: HashSet<&str> = word_regex
-            .captures_iter(in_query)
+            .captures_iter(&in_query)
             .map(|captures| captures.get(1).unwrap().as_str())
             .collect();
 
         let intersection = words_value.intersection(&words_query).count();
         let union = words_value.len() + words_query.len() - intersection;
 
-        let similarity = intersection as f32 / union as f32;
-
-        similarity
+        intersection as f32 / union as f32
     }
 
     pub fn levenshtein_similarity(word1: &str, word2: &str) -> f32 {
-        let answer = Search::are_values_empty(word1, word2);
-        if answer.0 {
-            return answer.1;
+        let (is_empty, similarity) = Search::are_values_empty(&word1, &word2);
+        if is_empty {
+            return similarity;
         }
 
         let distance = levenshtein(&word1.to_lowercase(), &word2.to_lowercase()) as f32;
@@ -117,16 +122,17 @@ impl Search {
     }
 
     pub fn similarities_full(in_value: &Vec<String>, in_query: &Vec<String>) -> f32 {
-        let answer = Search::are_vec_empty(in_value, in_query);
-        if answer.0 {
-            return answer.1;
+        let (is_empty, similarity) = Search::are_vec_empty(&in_value, &in_query);
+        if is_empty {
+            return similarity;
         }
+       
+        let similarities_score = Search::word_similarities(&in_value, &in_query);
 
-        let similarities_score = Search::word_similarities(in_value, in_query);
         let calculate_similarity_score = in_value
             .iter()
             .zip(in_query.iter())
-            .map(|(word1, word2)| Search::levenshtein_similarity(word1, word2))
+            .map(|(word1, word2)| Search::levenshtein_similarity(&word1, &word2))
             .sum::<f32>()
             / in_value.len().max(in_query.len()) as f32;
 
@@ -134,9 +140,9 @@ impl Search {
     }
 
     pub fn similarity_full(in_value: &str, in_query: &str) -> f32 {
-        let answer = Search::are_values_empty(in_value, in_query);
-        if answer.0 {
-            return answer.1;
+        let (is_empty, similarity) = Search::are_values_empty(&in_value, &in_query);
+        if is_empty {
+            return similarity;
         }
 
         let similarity_score = Search::word_similarity(in_value, in_query);
@@ -192,9 +198,9 @@ mod tests {
         let search = Search{
             id: "test".to_owned(),
             title: "".to_owned(),
-            tags: Vec::<String>::new(),
+            tags: Vec::new(),
             description: "".to_owned(),
-            references: Vec::<String>::new()
+            references: Vec::new()
         };
 
         assert_eq!(search.id, "test");
@@ -209,9 +215,9 @@ mod tests {
         let search = Search{
             id: "".to_owned(),
             title: "test".to_owned(),
-            tags: Vec::<String>::new(),
+            tags: Vec::new(),
             description: "".to_owned(),
-            references: Vec::<String>::new()
+            references: Vec::new()
         };
 
         assert_eq!(search.id, "");
@@ -226,9 +232,9 @@ mod tests {
         let search = Search{
             id: "".to_owned(),
             title: "".to_owned(),
-            tags: vec![String::from("test")],
+            tags: vec!["test".to_owned()],
             description: "".to_owned(),
-            references: Vec::<String>::new()
+            references: Vec::new()
         };
 
         assert_eq!(search.id, "");
@@ -243,9 +249,9 @@ mod tests {
         let search = Search{
             id: "".to_owned(),
             title: "".to_owned(),
-            tags: Vec::<String>::new(),
+            tags: Vec::new(),
             description: "test".to_owned(),
-            references: Vec::<String>::new()
+            references: Vec::new()
         };
 
         assert_eq!(search.id, "");
@@ -260,9 +266,9 @@ mod tests {
         let search = Search{
             id: "".to_owned(),
             title: "".to_owned(),
-            tags: Vec::<String>::new(),
+            tags: Vec::new(),
             description: "".to_owned(),
-            references: vec![String::from("test")]
+            references: vec!["test".to_owned()]
         };
 
 
@@ -284,7 +290,7 @@ mod tests {
     #[test]
     fn test_search_id_set() {
         let mut search = Search::new_empty();
-        search.id_set("template1".to_owned());
+        search.id_set(&"template1".to_owned());
 
         assert_eq!(search.id, "template1");
     }
@@ -292,7 +298,7 @@ mod tests {
     #[test]
     fn test_search_id_set_get() {
         let mut search = Search::new_empty();
-        search.id_set("template1".to_owned());
+        search.id_set(&"template1".to_owned());
 
         let out_id = search.id_get();
 
@@ -310,7 +316,7 @@ mod tests {
     #[test]
     fn test_search_title_set() {
         let mut search = Search::new_empty();
-        search.title_set("Template 1".to_owned());
+        search.title_set(&"Template 1".to_owned());
 
         assert_eq!(search.title, "Template 1");
     }
@@ -318,7 +324,7 @@ mod tests {
     #[test]
     fn test_search_title_set_get() {
         let mut search = Search::new_empty();
-        search.title_set("Template 1".to_owned());
+        search.title_set(&"Template 1".to_owned());
 
         let out_title = search.title_get();
 
@@ -330,13 +336,13 @@ mod tests {
         let mut search = Search::new_empty();
         search.tags = vec!["tag1".to_owned(), "tag2".to_owned()];
 
-        assert_eq!(search.tags_get(), vec!["tag1", "tag2"]);
+        assert_eq!(search.tags_get(), &vec!["tag1", "tag2"]);
     }
 
     #[test]
     fn test_search_tags_set() {
         let mut search = Search::new_empty();
-        search.tags_set(vec!["tag1".to_owned(), "tag2".to_owned()]);
+        search.tags_set(&vec!["tag1".to_owned(), "tag2".to_owned()]);
 
         assert_eq!(search.tags, vec!["tag1", "tag2"]);
     }
@@ -344,11 +350,11 @@ mod tests {
     #[test]
     fn test_search_tags_set_get() {
         let mut search = Search::new_empty();
-        search.tags_set(vec![String::from("test"), String::from("test2")]);
+        search.tags_set(&vec!["test".to_owned(), "test2".to_owned()]);
 
         let out_tags = search.tags_get();
 
-        assert_eq!(out_tags, vec![String::from("test"), String::from("test2")]);
+        assert_eq!(out_tags, &vec!["test", "test2"]);
     }
 
     #[test]
@@ -362,7 +368,7 @@ mod tests {
     #[test]
     fn test_search_description_set() {
         let mut search = Search::new_empty();
-        search.description_set("This is a sample description.".to_owned());
+        search.description_set(&"This is a sample description.".to_owned());
 
         assert_eq!(search.description, "This is a sample description.");
     }
@@ -370,11 +376,11 @@ mod tests {
     #[test]
     fn test_search_description_set_get() {
         let mut search = Search::new_empty();
-        search.description_set("$$$Bill$$$".to_owned());
+        search.description_set(&"$$$Bill$$$".to_owned());
 
         let out_description = search.description_get();
 
-        assert_eq!(out_description, "$$$Bill$$$".to_owned());
+        assert_eq!(out_description, "$$$Bill$$$");
     }
 
     #[test]
@@ -382,13 +388,13 @@ mod tests {
         let mut search = Search::new_empty();
         search.references = vec!["https://example.com".to_owned()];
 
-        assert_eq!(search.reference_get(), vec!["https://example.com"]);
+        assert_eq!(search.reference_get(), &vec!["https://example.com"]);
     }
 
     #[test]
     fn test_search_reference_set() {
         let mut search = Search::new_empty();
-        search.reference_set(vec!["https://example.com".to_owned()]);
+        search.reference_set(&vec!["https://example.com".to_owned()]);
 
         assert_eq!(search.references, vec!["https://example.com"]);
     }
@@ -396,11 +402,11 @@ mod tests {
     #[test]
     fn test_search_reference_set_get() {
         let mut search = Search::new_empty();
-        search.reference_set(vec![String::from("https://loler_gmbh.com"), String::from("script<alert()>")]);
+        search.reference_set(&vec!["https://loler_gmbh.com".to_owned(), "script<alert()>".to_owned()]);
 
         let out_tags = search.reference_get();
 
-        assert_eq!(out_tags, vec![String::from("https://loler_gmbh.com"), String::from("script<alert()>")]);
+        assert_eq!(out_tags, &vec!["https://loler_gmbh.com", "script<alert()>"]);
     }
 
     #[test]

@@ -186,15 +186,15 @@ impl Lake {
                                                 // If you would use the deserializing method, it would be easier but maybe not correct.
                                                 out_templates.push(Template::new(
                                                     in_yaml_template.id,
-                                                    in_search.id_get(),
+                                                    in_search.id_get().to_string(),
                                                     in_yaml_template.title,
-                                                    in_search.title_get(),
-                                                    in_yaml_template.tags,
-                                                    in_search.tags_get(),
+                                                    in_search.title_get().to_string(),
+                                                    in_yaml_template.tags.iter().map(|tag| tag.to_string()).collect(),
+                                                    in_search.tags_get().iter().map(|tag| tag.to_string()).collect(),
                                                     in_yaml_template.description,
-                                                    in_search.description_get(),
-                                                    in_yaml_template.references,
-                                                    in_search.reference_get(),
+                                                    in_search.description_get().to_string(),
+                                                    in_yaml_template.references.iter().map(|refe| refe.to_string()).collect(),
+                                                    in_search.reference_get().iter().map(|refe|refe.to_string()).collect(),
                                                 ));
                                             }
                                             Err(err) => {

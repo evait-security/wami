@@ -76,7 +76,7 @@ fn main() {
                 .short("S")
                 .long("sort")
                 .value_name("SORT")
-                .help("This will determen the sorting direction asc or desc")
+                .help("This will determine the sorting direction asc or desc")
                 .required(false)
                 .multiple(false)
         )
@@ -120,67 +120,179 @@ fn main() {
         .get_matches();
 
     // using the search struct to define the search parameters.
-    let mut search: search::Search = search::Search::new_empty();
+    let mut search: search::Search 
+        = search::Search::new_empty();
 
-    // Is default search set by entering just strings, then we will lock for tags
-    if let Some(search_names) = matches.values_of("strings") {
-        let in_search_tags: Vec<String> = search_names.map(String::from).collect();
-        let mut tags: Vec<String> = search.tags_get();
-        tags.extend(in_search_tags);
-        search.tags_set(tags);
+    // Is default search set by entering just strings,
+    // then we will search for tags
+    if let Some(search_names) 
+        = matches.values_of("strings") 
+    {
+        search
+            .tags_set(
+                &search_names
+                    .map(|tag| 
+                        tag
+                            .to_string()
+                    )
+                    .collect()
+        );
     }
 
     // Is search all set?
-    if let Some(search_names) = matches.values_of("search-all") {
-        let in_search_all_string: String = search_names.clone().collect::<Vec<_>>().join(" ");
-        search.id_set(in_search_all_string.to_owned());
-        search.title_set(in_search_all_string.to_owned());
+    if let Some(search_names) 
+        = matches.values_of("search-all") 
+    {
+        let search_all_string: String = 
+            search_names
+                .clone()
+                .collect::<Vec<_>>()
+                .join(" ");
+        
+        let search_all_vec: Vec<String>=
+            search_names
+                .map(|name|
+                    name
+                        .to_string()
+                )
+                .collect();   
 
-        let mut tag_vec = search.tags_get().to_owned();
-        tag_vec.push(search_names.clone().collect::<Vec<_>>().join(" "));
-        search.tags_set(tag_vec);
+        search
+            .id_set(
+                &search_all_string
+                    // .clone()
+            );
 
-        search.description_set(in_search_all_string.to_owned());
+        search
+            .title_set(
+                &search_all_string
+                    // .clone()
+            );
+        
+        // It is possible that the search.tags is not empty,
+        // because of default search is tags.
+        let mut search_tags_vec: Vec<String> =
+            search_all_vec
+                .clone();
 
-        let mut reference_vec = search.reference_get().to_owned();
-        reference_vec.push(search_names.clone().collect::<Vec<_>>().join(" "));
-        search.reference_set(reference_vec);
+        search_tags_vec
+            .push(
+                search
+                    .tags_get()
+                        .iter()
+                        .map(|tag| tag
+                            .to_string() 
+                        )
+                        .collect()
+            );
+
+        search
+            .tags_set(
+                &search_tags_vec
+                    //.clone()
+        );
+        
+        search
+            .description_set(
+                &search_all_string
+                    //.clone()
+        );
+        
+        search.reference_set(
+            &search_all_vec
+                //.clone()
+        );
     }
 
     // Is search unique names set?
-    if let Some(search_names) = matches.values_of("search-unique-name") {
-        let in_search_unique_name: String = search_names.collect::<Vec<_>>().join(" ");
-        search.id_set(search.id_get() + &in_search_unique_name);
+    if let Some(search_names) 
+        = matches.values_of("search-unique-name") 
+    {
+        search.id_set(
+            &(
+                search
+                    .id_get()
+                        .clone()
+                        .to_owned()
+                + " "
+                + &search_names
+                    //.clone()
+                    .collect::<Vec<_>>()
+                    .join(" ")
+            )
+        );
     }
 
     // Is search title set?
     if let Some(search_names) = matches.values_of("search-title") {
-        let in_search_title: String = search_names.collect::<Vec<_>>().join(" ");
-        search.title_set(search.title_get() + &in_search_title);
+        search.title_set(
+            &(
+                search
+                    .title_get()
+                        // .clone()
+                        .to_owned()
+                + " "
+                + &search_names
+                    //.clone()
+                    .collect::<Vec<_>>()
+                    .join(" ")
+            )
+        );
     }
 
     // Is search tags set?
     if let Some(search_names) = matches.values_of("search-tags") {
-        let in_search_tags: Vec<String> = search_names.map(String::from).collect();
-        let mut tags: Vec<String> = search.tags_get();
-        tags.extend(in_search_tags);
-        search.tags_set(tags);
+        let mut in_search_tags_vec: Vec<String> = 
+            search_names
+                .map(|search_name| search_name
+                    .to_string()
+                )
+                .collect();        
+        
+        in_search_tags_vec
+            .push(
+                search
+                    .tags_get()
+                    .iter()
+                    .map(|tag| tag
+                        .to_string())
+                    .collect());
+        search.tags_set(&in_search_tags_vec);
     }
 
     // Is search description set?
     if let Some(search_names) = matches.values_of("search-description") {
-        let in_search_description: String = search_names.collect::<Vec<_>>().join(" ");
-        search.description_set(search.description_get() + &in_search_description);
+        search.description_set(
+            &(
+                search
+                    .description_get()
+                        // .clone()
+                        .to_owned()
+                + " "
+                + &search_names
+                    // .clone()
+                    .collect::<Vec<_>>()
+                    .join(" ")
+            )
+        );
     }
 
     // Is search reference set?
     if let Some(search_names) = matches.values_of("search-references") {
-        let in_search_references: String = search_names.collect::<Vec<_>>().join(" ");
-        let mut in_search_references_vec: Vec<String> = Vec::<String>::new();
-        in_search_references_vec.push(in_search_references.to_owned());
-        let mut references: Vec<String> = search.reference_get();
-        references.extend(in_search_references_vec);
-        search.reference_set(references);
+        let mut in_search_references_vec: Vec<String> = 
+            search_names
+                .map(|search_name| search_name
+                    .to_string())
+                .collect();        
+        in_search_references_vec
+            .push(
+                search
+                    .reference_get()
+                    .iter()
+                    .map(|refe| refe
+                        .to_string())
+                    .collect());
+        search.reference_set(&in_search_references_vec);
     }
 
     // let mut lake_result: lake::Lake;
@@ -228,7 +340,7 @@ fn main() {
 
     // Create the lake an instance of the lake
     // We have the url if it has changed
-    // We have the update boolen
+    // We have the update boolean
     // And we have all the search parameters
     let lake_result = lake::Lake::new(url, update, search);
 

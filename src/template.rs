@@ -30,7 +30,7 @@ impl Template {
         in_references_search: Vec<String>
     ) -> Template{
         // Convert the incoming unique name to lowercase alphanumeric letters with hyphens.
-        let out_id: String = Template::convert_to_lowercase_alphanumeric_with_hyphens(&in_id.to_owned());
+        let out_id: String = Template::convert_to_lowercase_alphanumeric_with_hyphens(&in_id);
         
         // Convert search unique name to lowercase alphanumeric letters with hyphens.
         let out_id_search: String = Template::convert_to_lowercase_alphanumeric_with_hyphens(&in_id_search);
@@ -42,10 +42,10 @@ impl Template {
         let out_title_distance: f32 = search::Search::similarity_full(&in_title, &in_title_search);
         
         // Convert the incoming tags to lowercase alphanumeric letters with hyphens.
-        let out_tags: Vec<String> = Template::convert_tags_to_excepted_format(in_tags);
+        let out_tags: Vec<String> = Template::convert_tags_to_excepted_format(&in_tags);
 
         // Convert the incoming search tags to lowercase alphanumeric letter with hyphens.
-        let out_tags_search: Vec<String> = Template::convert_tags_to_excepted_format(in_tags_search);
+        let out_tags_search: Vec<String> = Template::convert_tags_to_excepted_format(&in_tags_search);
         
         // Calculate the similarities from the tags to the search tags.
         let out_tags_distance: f32 = search::Search::similarities_full(&out_tags, &out_tags_search);
@@ -133,17 +133,26 @@ impl Template {
         out_string
     }
 
-    // Make the tags vec robust
-    // Will make all tags uniform, this simplifies the search algorithmic.
-    pub fn convert_tags_to_excepted_format(in_tags: Vec<String>) -> Vec<String> {
-        let mut out_tags: Vec<String> = Vec::<String>::new();
-        for tag in in_tags {
-            out_tags.push(
-                Template::convert_to_lowercase_alphanumeric_with_hyphens(&tag)
-            );
-        }
+    // // Make the tags vec robust
+    // // Will make all tags uniform, this simplifies the search algorithmic.
+    // pub fn convert_tags_to_excepted_format(in_tags: Vec<String>) -> Vec<String> {
+    //     let mut out_tags: Vec<String> = Vec::<String>::new();
+    //     for tag in in_tags {
+    //         out_tags.push(
+    //             Template::convert_to_lowercase_alphanumeric_with_hyphens(&tag)
+    //         );
+    //     }
 
-        out_tags
+    //     out_tags
+    // }
+
+    // Make the tags vec robust
+    // Will make all tags uniform, this simplifies the search algorithmic.    
+    pub fn convert_tags_to_excepted_format(in_tags: &Vec<String>) -> Vec<String> {
+        in_tags
+            .iter()
+            .map(|tag| Template::convert_to_lowercase_alphanumeric_with_hyphens(&tag))
+            .collect()
     }
 
     // Make the string robust.
@@ -151,15 +160,13 @@ impl Template {
     // See the requirements for the unique name and tags fields.
     // Only lowercase alphanumeric letters or hyphens are allowed.
     pub fn convert_to_lowercase_alphanumeric_with_hyphens(in_str: &String) -> String {
-        let mut out_string = String::new();
-
-        for c in in_str.chars() {
-            if c.is_ascii_alphanumeric() || c == '-' || c.is_whitespace(){
-                out_string.push(c.to_ascii_lowercase());
-            }
-        }
-
-        out_string
+        in_str
+            .chars()
+            .filter(|c| c.is_ascii_alphanumeric() || *c == '-' || c.is_whitespace())
+            .map(|c| c
+                .to_ascii_lowercase()
+                .to_string())
+            .collect()
     }
 }
 
@@ -258,6 +265,6 @@ mod tests {
         let input_tags = vec!["ConvertME".to_string(), "Into-Lowercase!".to_string()];
         let expected_output = vec!["convertme".to_string(), "into-lowercase".to_string()];
 
-        assert_eq!(Template::convert_tags_to_excepted_format(input_tags), expected_output);
+        assert_eq!(Template::convert_tags_to_excepted_format(&input_tags), expected_output);
     }
 }
