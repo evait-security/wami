@@ -160,13 +160,11 @@ fn main() {
         search
             .id_set(
                 &search_all_string
-                    // .clone()
             );
 
         search
             .title_set(
                 &search_all_string
-                    // .clone()
             );
         
         // It is possible that the search.tags is not empty,
@@ -189,18 +187,15 @@ fn main() {
         search
             .tags_set(
                 &search_tags_vec
-                    //.clone()
         );
         
         search
             .description_set(
                 &search_all_string
-                    //.clone()
         );
         
         search.reference_set(
             &search_all_vec
-                //.clone()
         );
     }
 
@@ -216,7 +211,6 @@ fn main() {
                         .to_owned()
                 + " "
                 + &search_names
-                    //.clone()
                     .collect::<Vec<_>>()
                     .join(" ")
             )
@@ -229,11 +223,9 @@ fn main() {
             &(
                 search
                     .title_get()
-                        // .clone()
                         .to_owned()
                 + " "
                 + &search_names
-                    //.clone()
                     .collect::<Vec<_>>()
                     .join(" ")
             )
@@ -266,11 +258,9 @@ fn main() {
             &(
                 search
                     .description_get()
-                        // .clone()
                         .to_owned()
                 + " "
                 + &search_names
-                    // .clone()
                     .collect::<Vec<_>>()
                     .join(" ")
             )
