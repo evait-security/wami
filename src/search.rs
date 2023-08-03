@@ -1,7 +1,5 @@
 use crate::template::Template;
 use levenshtein::levenshtein;
-use regex::Regex;
-use std::collections::HashSet;
 
 // This will be the framework for the search algorithmic.
 
@@ -90,22 +88,18 @@ impl Search {
             return similarity;
         }
 
-        let word_regex = Regex::new(r"\b(\w+)\b").unwrap();
+        let value: &str = &Template::convert_to_lowercase_alphanumeric_with_hyphens(&in_value.to_string());
+        let query: &str = &Template::convert_to_lowercase_alphanumeric_with_hyphens(&in_query.to_string());
 
-        let words_value: HashSet<&str> = word_regex
-            .captures_iter(&in_value)
-            .map(|captures| captures.get(1).unwrap().as_str())
-            .collect();
+        if Search::are_values_unequal_long(&value, &query){
+            return 0.0;
+        }
 
-        let words_query: HashSet<&str> = word_regex
-            .captures_iter(&in_query)
-            .map(|captures| captures.get(1).unwrap().as_str())
-            .collect();
+        if Search::are_values_equal(&value, &query) {
+            return 1.0
+        }
 
-        let intersection = words_value.intersection(&words_query).count();
-        let union = words_value.len() + words_query.len() - intersection;
-
-        intersection as f32 / union as f32
+        0.0
     }
 
     pub fn levenshtein_similarity(word1: &str, word2: &str) -> f32 {
@@ -169,6 +163,20 @@ impl Search {
             return (true, 0.0);
         }
         (false, 0.0)
+    }
+
+    pub fn are_values_unequal_long(in_value: &str, in_query: &str) -> bool {
+        if in_value.len() != in_query.len() {
+            return true;
+        }
+        false
+    }
+
+    pub fn are_values_equal(in_value: &str, in_query: &str) -> bool {
+        if in_value == in_query {
+            return true;
+        }
+        false
     }
 }
 
