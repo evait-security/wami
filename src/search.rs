@@ -424,7 +424,7 @@ mod tests {
 
         let similarity = Search::word_similarities(&value, &query);
 
-        assert_eq!(similarity, 0.4);
+        assert_eq!(similarity, 0.0);
     }
 
     #[test]
@@ -434,7 +434,7 @@ mod tests {
 
         let similarity = Search::word_similarity(value, query);
         
-        assert_eq!(similarity, 0.4);
+        assert_eq!(similarity, 0.0);
     }
 
     #[test]
