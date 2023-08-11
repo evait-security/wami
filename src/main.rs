@@ -46,7 +46,7 @@ fn main() {
                 .required(false) .multiple(true) )
         .arg(
             Arg::with_name("search-tags")
-                .short("g")
+                .short("T")
                 .long("search-tags")
                 .value_name("SEARCH_TAGS")
                 .help("This will search throw all the tags with the values.")
