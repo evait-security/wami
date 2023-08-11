@@ -4,17 +4,17 @@ TARGET = wami
 
 .PHONY: all build install clean uninstall
 
-all: build install clean
+all: install clean
 
 build:
 	RUSTFLAGS="-C target-cpu=native" cargo build -r
 
 install:
-	cp target/release/wami /usr/local/bin/
+	cargo install --path .
 
 clean:
 	cargo clean
 
 uninstall:
-	sudo rm -f /usr/local/bin/wami
-	sudo rm -Rf ~/.config/wami
+	cargo uninstall
+	rm -Rf $HOME/.config/wami
