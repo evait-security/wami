@@ -2,7 +2,7 @@
 
 TARGET = wami
 
-.PHONY: all install clean uninstall
+.PHONY: all install clean
 
 all: install clean
 
