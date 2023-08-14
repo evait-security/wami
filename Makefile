@@ -17,4 +17,4 @@ clean:
 
 uninstall:
 	cargo uninstall
-	rm -Rf $HOME/.config/wami
+	rm -Rf $$HOME/.config/wami
