@@ -50,13 +50,8 @@ jobs:
         git status
         git config --global user.email "tb@evait.de"
         git config --global user.name "NxtTAB"
-        git clone https://github.com/evait-security/wami.git
-        cd wami
-        cp ../target/release/wami bin/wami
-        chmod +x bin/wami
         git add bin/wami
-        git status
+        echo "git add bin/wami"
         git commit -m "add binary wami"
         git status
         git push
-        git status
