@@ -24,8 +24,8 @@ Contributions to Wami are highly encouraged. Developers can add new programs, im
 ## Installation:
 To install Wami, follow these steps:
 1. Download the binary <binary_placeholder>.
-2. ```console chmod +x wami ```
-3. ```console wami ```
+2. ``` chmod +x wami ```
+3. ``` wami ```
    
 1. Clone the repository from GitHub: `git clone git@github.com:evait-security/wami.git`
 2. Navigate to the project directory: `cd wami`
