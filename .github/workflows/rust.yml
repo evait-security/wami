@@ -38,20 +38,15 @@ jobs:
       run: |
         cat README.md | grep binary &&
         placeholder=$(realpath target/release/wami) &&
-        sed -i "s|<binary_placeholder>|$placeholder|g" README.md &&
-        cat README.md | grep $placeholder &&
-        mkdir bin/linux_x64
-        cp $placeholder bin/linux_X64
+        mkdir -p bin/linux_x64
+        cp $placeholder bin/linux_x64
       env:
         ACCESS_TOKEN: ${{ secrets.rust.ci_readme_update }}
 
     - name: Commit and push changes
       run: |
-        git status
         git config --global user.email "tb@evait.de"
         git config --global user.name "NxtTAB"
-        git add bin/wami
-        echo "git add bin/wami"
-        git commit -m "add binary wami"
-        git status
+        git add bin/linux_x64/wami
+        git commit -m "add linux_x64 binary wami"
         git push
