@@ -39,5 +39,6 @@ jobs:
       run: cargo build --release --verbose
     - name: Modify README
       run: |
-        sed -i "s|<binary_placeholder>|$(realpath target/release/wami)|g" README.md
+        placeholder=$(realpath target/release/wami) &&
+        sed -i "s|<binary_placeholder>|$placeholder|g" README.md
       working-directory: ${{ github.workspace }}
