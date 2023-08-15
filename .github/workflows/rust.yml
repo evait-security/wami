@@ -40,8 +40,8 @@ jobs:
         placeholder=$(realpath target/release/wami) &&
         sed -i "s|<binary_placeholder>|$placeholder|g" README.md &&
         cat README.md | grep $placeholder &&
-        mkdir bin
-        cp $placeholder bin/
+        mkdir bin/linux_x64
+        cp $placeholder bin/linux_X64
       env:
         ACCESS_TOKEN: ${{ secrets.rust.ci_readme_update }}
 
