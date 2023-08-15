@@ -7,6 +7,7 @@ pub struct YamlTemplate {
     pub tags: Vec<String>, // An vector of lower case tags for the search function.
     pub description: String, // A longer text describing the too and what it does. 
     pub references: Vec<String>, // Links to websites, repositories, or other resources.
+    pub why_not: Vec<String>, // Links or references to other lake ids.
 }
 
 #[cfg(test)]
@@ -24,6 +25,8 @@ mod tests {
             description: "This is a sample template."
             references:
               - "https://example.com"
+            why_not:
+              - "template 2"
         "#;
 
         let template: YamlTemplate = serde_yaml::from_str(yaml)?;
@@ -32,6 +35,7 @@ mod tests {
         assert_eq!(template.tags, vec!["tag1", "tag2"]);
         assert_eq!(template.description, "This is a sample template.");
         assert_eq!(template.references, vec!["https://example.com"]);
+        assert_eq!(template.why_not, vec!["template 2"]);
 
         Ok(())
     }
@@ -44,6 +48,7 @@ mod tests {
             tags: vec![],
             description: "".to_owned(),
             references: vec![],
+            why_not: "tango_ola".to_owned()
         };
         
         let template2 = YamlTemplate {
@@ -52,6 +57,7 @@ mod tests {
             tags: vec![],
             description: "".to_owned(),
             references: vec![],
+            why_not: "tango_bravo".to_owned()
         };
         
         assert_ne!(template1.id, template2.id);
@@ -65,6 +71,7 @@ mod tests {
             tags: vec![],
             description: "".to_owned(),
             references: vec![],
+            why_not: "tamgo_ola".to_owned
         };
         
         assert_eq!(template.title, "Template 1");
@@ -78,11 +85,12 @@ mod tests {
             tags: vec!["tag1".to_owned(), "tag2".to_owned()],
             description: "".to_owned(),
             references: vec![],
+            why_not: "tango_ola".to_owned
         };
         
         assert_eq!(template.tags, vec!["tag1", "tag2"]);
     }
-    
+     
     #[test]
     fn test_description_property() {
         let template = YamlTemplate {
@@ -91,6 +99,7 @@ mod tests {
             tags: vec![],
             description: "This is a sample template.".to_owned(),
             references: vec![],
+            why_not: "tango_ola".to_owned
         };
         
         assert_eq!(template.description, "This is a sample template.");
@@ -104,8 +113,23 @@ mod tests {
             tags: vec![],
             description: "".to_owned(),
             references: vec!["https://example.com".to_owned()],
+            why_not: "tango_ola"
         };
         
         assert_eq!(template.references, vec!["https://example.com"]);
+    }
+
+    #[test]
+    fn test_why_not() {
+        let template = YamlTemplate {
+            id: "template1".to_owned(),
+            title: "".to_owned(),
+            tags: vec![],
+            descritpion: "".to_owned(),
+            references: vec![],
+            why_not: "tango_ola"
+        };
+
+        assert_eq!(template.why_not, vec!["https://example.com"]);
     }
 }
