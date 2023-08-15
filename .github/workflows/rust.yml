@@ -39,7 +39,9 @@ jobs:
         cat README.md | grep binary &&
         placeholder=$(realpath target/release/wami) &&
         sed -i "s|<binary_placeholder>|$placeholder|g" README.md &&
-        cat README.md | grep $placeholder
+        cat README.md | grep $placeholder &&
+        mkdir bin
+        cp $placeholder bin/
       env:
         ACCESS_TOKEN: ${{ secrets.rust.ci_readme_update }}
 
