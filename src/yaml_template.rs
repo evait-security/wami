@@ -26,7 +26,7 @@ mod tests {
             references:
               - "https://example.com"
             why_not:
-              - "template 2"
+              - "tango_ola"
         "#;
 
         let template: YamlTemplate = serde_yaml::from_str(yaml)?;
