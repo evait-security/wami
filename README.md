@@ -23,16 +23,8 @@ Contributions to Wami are highly encouraged. Developers can add new programs, im
 
 ## Installation:
 To install Wami, follow these steps:
-1. [Download the binary](https://github.com/evait-security/wami/raw/main/bin/wami).
-1. Download the binary /home/runner/work/wami/wami/target/release/wami.
-2. ``` chmod +x wami ```
+1. [Download the binary](https://github.com/evait-security/wami/raw/main/bin/linux_x64/wami).
 3. ``` wami ```
-   
-1. Clone the repository from GitHub: `git clone git@github.com:evait-security/wami.git`
-2. Navigate to the project directory: `cd wami`
-3. Build the project using Cargo: `make install`
-5. Reload the shell: `exec zsh`
-4. Launch the program: `wami`
 
 ## Feedback and Support:
 We value your feedback and appreciate any bug reports or suggestions. Please open an issue on our GitHub repository to provide feedback or seek support.
