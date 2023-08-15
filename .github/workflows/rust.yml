@@ -49,6 +49,6 @@ jobs:
       run: |
         git config --global user.email "tb@evait.de"
         git config --global user.name "NxtTAB"
-        git add bin/linux_x64/wami
+        git add bin/*
         git commit -m "add linux_x64 binary wami"
         git push
