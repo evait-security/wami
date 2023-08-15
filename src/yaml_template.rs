@@ -35,7 +35,7 @@ mod tests {
         assert_eq!(template.tags, vec!["tag1", "tag2"]);
         assert_eq!(template.description, "This is a sample template.");
         assert_eq!(template.references, vec!["https://example.com"]);
-        assert_eq!(template.why_not, vec!["template 2"]);
+        assert_eq!(template.why_not, vec!["tango_ola"]);
 
         Ok(())
     }
@@ -48,7 +48,7 @@ mod tests {
             tags: vec![],
             description: "".to_owned(),
             references: vec![],
-            why_not: "tango_ola".to_owned()
+            why_not: vec![]
         };
         
         let template2 = YamlTemplate {
@@ -57,7 +57,7 @@ mod tests {
             tags: vec![],
             description: "".to_owned(),
             references: vec![],
-            why_not: "tango_bravo".to_owned()
+            why_not: vec![]
         };
         
         assert_ne!(template1.id, template2.id);
@@ -71,7 +71,7 @@ mod tests {
             tags: vec![],
             description: "".to_owned(),
             references: vec![],
-            why_not: "tamgo_ola".to_owned
+            why_not: vec![]
         };
         
         assert_eq!(template.title, "Template 1");
@@ -85,7 +85,7 @@ mod tests {
             tags: vec!["tag1".to_owned(), "tag2".to_owned()],
             description: "".to_owned(),
             references: vec![],
-            why_not: "tango_ola".to_owned
+            why_not: vec![]
         };
         
         assert_eq!(template.tags, vec!["tag1", "tag2"]);
@@ -99,7 +99,7 @@ mod tests {
             tags: vec![],
             description: "This is a sample template.".to_owned(),
             references: vec![],
-            why_not: "tango_ola".to_owned
+            why_not: vec![]
         };
         
         assert_eq!(template.description, "This is a sample template.");
@@ -113,7 +113,7 @@ mod tests {
             tags: vec![],
             description: "".to_owned(),
             references: vec!["https://example.com".to_owned()],
-            why_not: "tango_ola"
+            why_not: vec![]
         };
         
         assert_eq!(template.references, vec!["https://example.com"]);
@@ -125,11 +125,12 @@ mod tests {
             id: "template1".to_owned(),
             title: "".to_owned(),
             tags: vec![],
-            descritpion: "".to_owned(),
+            description: "".to_owned(),
             references: vec![],
-            why_not: "tango_ola"
+            why_not: vec!["tango_ola".to_owned()]
         };
 
-        assert_eq!(template.why_not, vec!["https://example.com"]);
+        assert_eq!(template.why_not, vec!["tango_ola"]);
     }
+
 }
