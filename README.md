@@ -25,7 +25,7 @@ Contributions to Wami are highly encouraged. Developers can add new programs, im
 To install Wami, follow these steps:
 1. [Download the binary](https://github.com/evait-security/wami/raw/main/bin/linux_x64/wami).
 3. ``` chmod +x wami ```
-4. wami
+4. ``` wami ```
 
 ## Feedback and Support:
 We value your feedback and appreciate any bug reports or suggestions. Please open an issue on our GitHub repository to provide feedback or seek support.
