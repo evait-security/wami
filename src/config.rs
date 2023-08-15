@@ -5,6 +5,8 @@ use std::io::{BufReader, Write};
 use std::path::PathBuf;
 use url::Url;
 
+// This is the configruation file of the rust program.
+
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Config {
     pub url: String,
