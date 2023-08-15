@@ -37,8 +37,7 @@ jobs:
     - uses: actions/checkout@v2
     - name: Release
       run: cargo build --release --verbose
-    - name: Upload binary
-      uses: actions/upload-artifact@v2
-      with:
-        name: wami
-        path: target/release/wami
+    - name: Modify README
+      run: |
+        sed -i "s|<binary_placehoder>|$(ls target/release/wami)|g" READEME.md
+      working-directory: ${{ github.workspace }}
