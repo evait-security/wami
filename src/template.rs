@@ -6,7 +6,7 @@ pub struct Template {
     id: String, // A unique name in lower case letters.
     title: String, // The real name of the tool / software.
     tags: Vec<String>, // An vector of lower case tags for the search function.
-    description: String, // A longer text describing the too and what it does. 
+    description: String, // A longer text describing the why and what it does. 
     references: Vec<String>, // Links to websites, repositories, or other resources.
     distance: f32, // This will set the average similarity to the search value.
 }
