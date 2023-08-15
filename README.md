@@ -23,7 +23,7 @@ Contributions to Wami are highly encouraged. Developers can add new programs, im
 
 ## Installation:
 To install Wami, follow these steps:
-1. Download the binary <binary_placeholder>.
+1. Download the binary /home/runner/work/wami/wami/target/release/wami.
 2. ``` chmod +x wami ```
 3. ``` wami ```
    
