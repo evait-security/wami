@@ -37,7 +37,7 @@ jobs:
     - name: Copy file to bin folder
       run: |
         placeholder=$(realpath target/release/wami)
-        chown +x $placeholder
+        chmod +x $placeholder
         mkdir -p bin/linux_x64
         cp $placeholder bin/linux_x64
       env:
