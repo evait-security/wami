@@ -8,7 +8,7 @@ use clap::{App, Arg};
 use colored::Colorize;
 
 fn main() {
-    // Define the command-line arguments using clap
+    // Define the command-line arguments using clap for comandline arguments
     let matches = App::new(format!("{} - What am I", "WAMI".bold().green()))
         .version("\tVersion: 0.1.0\n")
         .author("evait security GmbH\nNxtTAB <wami@evait.de>\n\n")
