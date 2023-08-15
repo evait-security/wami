@@ -37,8 +37,14 @@ jobs:
     - name: Copy file to bin folder
       run: |
         placeholder=$(realpath target/release/wami)
+        ls target/release
+        ls target/release/wami
+        echo $placeholder
+        ls $placeholder
         mkdir -p bin/linux_x64
+        ls bin/linux_x64
         cp $placeholder bin/linux_x64
+        ls bin/linux_x64
         chmod +x bin/linux_x64/wami
       env:
         ACCESS_TOKEN: ${{ secrets.rust.ci_readme_update }}
