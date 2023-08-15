@@ -41,4 +41,13 @@ jobs:
       run: |
         placeholder=$(realpath target/release/wami) &&
         sed -i "s|<binary_placeholder>|$placeholder|g" README.md
-      working-directory: ${{ github.workspace }}
+      env:
+        ACCESS_TOKEN: ${{ secrets.rust.ci_readme_update }}
+
+    - name: Commit and push changes
+      run: |
+        git config --global user.email "tb@evait.de"
+        git config --global user.name "NxtTAB"
+        git add README.md
+        git commit -m "Update placeholder"
+        git push
