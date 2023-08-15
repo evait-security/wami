@@ -15,7 +15,7 @@ Cargo.lock
 
 
 # Added by cargo
-/target
+# /target
 
 # Lake
 /wami-templates-main
