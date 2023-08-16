@@ -108,7 +108,7 @@ impl Lake {
     }
 
     // Sort the template vector in descending order based on distance.
-    pub fn print_top_short_list(&mut self, how_many_max: usize, in_sort_value: String) {
+    pub fn print_top_short_list(&mut self, how_many_max: usize, in_sort_value: String, why_not: bool) {
         let _ = &self
             .templates
             .sort_by(|a, b| b.distance().partial_cmp(&a.distance()).unwrap());
@@ -120,12 +120,12 @@ impl Lake {
             "desc" => {
                 for (index, template) in max_hits_templates.iter().rev().enumerate() {
                     let reverse_index = max_hits_templates.len() - index;
-                    println!("{}: {}", reverse_index, template.to_short_string());
+                    println!("{}: {}", reverse_index, template.to_short_string(why_not));
                 }
             }
             _ => {
                 for (index, template) in max_hits_templates.iter().enumerate() {
-                    println!("{}: {}", index + 1, template.to_short_string());
+                    println!("{}: {}", index + 1, template.to_short_string(why_not));
                 }
             }
         }
@@ -188,6 +188,7 @@ impl Lake {
                                                     in_search.description_get().to_string(),
                                                     in_yaml_template.references.iter().map(|refe| refe.to_string()).collect(),
                                                     in_search.reference_get().iter().map(|refe|refe.to_string()).collect(),
+                                                    in_yaml_template.why_not.iter().map(|why_not| why_not.to_string()).collect()
                                                 ));
                                             }
                                             Err(err) => {

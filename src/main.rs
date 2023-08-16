@@ -117,6 +117,16 @@ fn main() {
                 .required(false)
                 .multiple(false)
         )
+        .arg(
+            Arg::with_name("why_not")
+                .short("W")
+                .long("why_not")
+                .value_name("WHY_NOT")
+                .takes_value(false)
+                .help("Set why not use different programs.")
+                .required(false)
+                .multiple(false)
+        )
         .get_matches();
 
     // using the search struct to define the search parameters.
@@ -328,6 +338,13 @@ fn main() {
         }
     }
 
+    // Is the why_not value set?
+    let mut why_not_option: bool = false;
+    if let Some(_search_name) = matches.values_of("why_not") {
+        why_not_option = true;
+    }
+
+
     // Create the lake an instance of the lake
     // We have the url if it has changed
     // We have the update boolean
@@ -340,7 +357,7 @@ fn main() {
             if matches.is_present("show-all") {
                 lake.print_top_hits(max_list, sort_value);
             } else {
-                lake.print_top_short_list(max_list, sort_value);
+                lake.print_top_short_list(max_list, sort_value, why_not_option);
             }
         }
         Err(e) => {
