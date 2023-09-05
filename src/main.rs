@@ -359,6 +359,18 @@ fn main() {
             } else {
                 lake.print_top_short_list(max_list, sort_value, why_not_option);
             }
+
+            if !update {
+                match config::Config::get_git_hash(&lake.get_config_url()) {
+                    Ok(hash) => {
+                        if hash != lake.get_config_hash() {
+                            let message = format!("{}", "Please update the lake, it is outdated.".bold().red());
+                            println!("{}", message);
+                        }
+                    },
+                    Err(_err) => println!("Version of lake can not be downloaded.")
+                }
+            }
         }
         Err(e) => {
             println!("Failed to create the Lake: {}", e);
@@ -366,17 +378,4 @@ fn main() {
         }
     }
 
-    // Check for updates.
-    tokio::runtime::Runtime::new().unwrap().block_on(async {
-        match config::Config::new() {
-            Ok(config) => {
-                lake::Lake::get_zip_hash_of_url_lake(&config)
-                    .await
-                    .expect("Failed to load zip at lake::Lake::new");
-            }
-            Err(e) => {
-                println!("Can not load check for updates: {}", e);
-            }
-        }
-    })
 }

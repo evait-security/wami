@@ -1,7 +1,5 @@
 use crate::{config::Config, search::Search, template::Template, yaml_template};
-use colored::Colorize;
 use reqwest::Client;
-use sha2::{Digest, Sha256};
 use std::{
     fs::{self, File},
     io::{self, Read},
@@ -24,7 +22,7 @@ impl std::fmt::Display for MyError {
 impl std::error::Error for MyError {}
 
 pub struct Lake {
-    _config: Config,
+    config: Config,
     templates: Vec<Template>,
 }
 
@@ -42,17 +40,48 @@ impl Lake {
         if in_url != "" {
             out_config.del_lake_dir();
             out_config.set_new_url(in_url.to_owned());
-            out_config.hash = "".to_string();
-            if let Err(e) = Config::save_to_config_yaml(&out_config.url, &out_config.hash) {
-                return Err(e);
+            
+            // Download the hash form git to the config.yaml file.
+            match Config::get_git_hash(&out_config.url) {
+                Ok(hash) => {
+                    // Save the url and hash in the config.yaml
+                    out_config.hash = hash;
+                    if let Err(e) = Config::save_to_config_yaml(&out_config.url, &out_config.hash) {
+                        return Err(e);
+                    }    
+                },
+                Err(_err) => {
+                    // Save the url and err for hash in the config.yaml
+                    if let Err(e) = Config::save_to_config_yaml(&out_config.url, &"no_hash".to_owned()) {
+                        return Err(e);
+                    }
+                }
             }
         }
 
         // If in_update is set to true, then delete the lake folder.
-        // and a reload the config struct.
+        // and reload the config struct.
         if in_update {
+            // let temp_url = out_config.url;
             out_config.del_lake_dir();
-            out_config.hash = "".to_string();
+            
+            // Download the hash form git to the config.yaml file.
+            match Config::get_git_hash(&out_config.url) {
+                Ok(hash) => {
+                    // Save the url and hash in the config.yaml
+                    if let Err(e) = Config::save_to_config_yaml(&out_config.url, &hash) {
+                        return Err(e);
+                    }    
+                },
+                Err(_err) => {
+                    println!("Version of the lake can not be downloaded.");
+                    // Save the url and err for hash in the config.yaml
+                    if let Err(e) = Config::save_to_config_yaml(&out_config.url, &"no_hash".to_owned()) {
+                        return Err(e);
+                    }
+                }
+            }
+
             if let Err(e) = Config::save_to_config_yaml(&out_config.url, &out_config.hash) {
                 return Err(e);
             }
@@ -75,9 +104,17 @@ impl Lake {
 
         // Creating the lake struct.
         Ok(Lake {
-            _config: out_config.clone(),
+            config: out_config.clone(),
             templates: Lake::load_lake_from_config_dir(out_config, in_search),
         })
+    }
+
+    pub fn get_config_hash(&self) -> String {
+        self.config.hash.to_owned()
+    }
+
+    pub fn get_config_url(&self) -> String {
+        self.config.url.to_owned()
     }
 
     // Sort the template vector in descending order based on distance.
@@ -238,15 +275,22 @@ impl Lake {
         // If the request is ok read the bytes in the archive
         let bytes = response.bytes().await?;
 
-        // Generate the hash for the config.yaml file.
-        let hash_hex = Lake::generate_hash(&bytes);
-
-        // Save the url and hash in the config.yaml
-        if let Err(e) = Config::save_to_config_yaml(&in_config.url, &hash_hex) {
-            return Err(e);
+        // Download the hash form git to the config.yaml file.
+        match Config::get_git_hash(&in_config.url) {
+            Ok(hash) => {
+                // Save the url and hash in the config.yaml
+                if let Err(e) = Config::save_to_config_yaml(&in_config.url, &hash) {
+                    return Err(e);
+                }    
+            },
+            Err(_err) => {
+                println!("Version of the lake can not be downloaded.");
+                // Save the url and err for hash in the config.yaml
+                if let Err(e) = Config::save_to_config_yaml(&in_config.url, &"no_hash".to_owned()) {
+                    return Err(e);
+                }
+            }
         }
-
-        //Config::save_to_config_yaml(&in_config.url, &hash_hex);
 
         let reader = std::io::Cursor::new(bytes);
         let mut archive = ZipArchive::new(reader)?;
@@ -280,45 +324,6 @@ impl Lake {
             }
         }
         Ok(())
-    }
-
-    // Create the hash of the zip file from the given url
-    // and print information to the user if the hash is different to the saved hash.
-    pub async fn get_zip_hash_of_url_lake(
-        in_config: &Config,
-    ) -> Result<String, Box<dyn std::error::Error>> {
-        let client = Client::new();
-
-        // Check the connection to the url
-        Lake::check_connection_to_url(in_config.url.to_owned()).await?;
-
-        // Send a request to get the zip.
-        let response = client.get(in_config.url.to_owned()).send().await?;
-
-        // If this request fails, the return an error.
-        if !response.status().is_success() {
-            return Err("Failed to fetch the zip file at Lake::load_zip_form_url".into());
-        }
-
-        // If the request is ok read the bytes in the archive
-        let bytes = response.bytes().await?;
-
-        // Generate the hash for the config.yaml file.
-        let hash_hex = Lake::generate_hash(&bytes);
-
-        if in_config.hash != hash_hex && in_config.hash != "" {
-            println!("{}", format!("{}", "There is a new update.".bold().red()));
-            println!("Use: {}", format!("{}", "wami -u".bold().green()))
-        }
-
-        Ok(hash_hex)
-    }
-
-    pub fn generate_hash(in_data: &[u8]) -> String {
-        // Generate the hash for the config.yaml file.
-        let hash = Sha256::digest(in_data);
-        let hash_hex = format!("{:x}", hash);
-        hash_hex
     }
 
     // This will check if it is possible to connect to the url.

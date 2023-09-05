@@ -1,4 +1,7 @@
+use isahc;
+use isahc::ReadResponseExt;
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 use std::env;
 use std::fs;
 use std::io::{BufReader, Write};
@@ -31,7 +34,7 @@ impl Config {
     }
 
     pub fn init_config_yaml(config_path: PathBuf) -> Result<PathBuf, Box<dyn std::error::Error>> {
-        // If the config.yaml file is not present then create it.
+        // If the path to $HOME/.config/wami is not present then create it.
         if !Config::is_dir_present(config_path.to_owned()) {
             Config::create_config_path(config_path.to_owned())?;
         }
@@ -40,11 +43,23 @@ impl Config {
         let config_file_path: PathBuf = Config::get_config_file_path(config_path.clone());
         if !Config::is_config_yaml_present(config_file_path.clone()) {
             // Creating an Config struct.
-            let config_yaml = Config {
-                url: "https://github.com/evait-security/wami-templates/archive/refs/heads/main.zip"
-                    .to_string(),
-                hash: "".to_string(),
-            };
+            let config_yaml;
+            let in_url: &String = &"https://github.com/evait-security/wami-templates/archive/refs/heads/main.zip".to_string();
+            match Config::get_git_hash(in_url) {
+                Ok(hash) => {
+                    config_yaml = Config {
+                        url: in_url.to_owned(),
+                        hash: hash.to_string(),
+                    };    
+                },
+                Err(_err) => {
+                    println!("Version of the lake can not be downloaded. Setting the hash to empty string.");
+                    config_yaml = Config {
+                        url: in_url.to_owned(),
+                        hash: "".to_string(),
+                    };
+                }
+            }
 
             let yaml_content = serde_yaml::to_string(&config_yaml)?;
 
@@ -160,5 +175,37 @@ impl Config {
         file.write_all(yaml_content.as_bytes())?;
 
         Ok(())
+    }
+
+    pub fn get_git_hash(in_url: &String) -> Result<String, Box<dyn std::error::Error>> {
+        if let Ok(url) = Url::parse(&in_url) {
+            if let Some(branch_name) = url.path_segments().unwrap().last() {
+                if branch_name.ends_with(".zip") {
+                    let repo_url = url.clone();
+                    let repo_parts: Vec<&str> = repo_url.path_segments().unwrap().take(3).collect();
+    
+                    let mut api_url = Url::parse("https://api.github.com").unwrap();
+                    api_url
+                        .path_segments_mut()
+                        .unwrap()
+                        .extend(&["repos", repo_parts[0], repo_parts[1], "git", "refs", "heads", branch_name.trim_end_matches(".zip")]);
+    
+                    let mut response = isahc::get(&api_url.to_string())?;
+                    let response_text = response.text()?;
+                    let parsed_response: Value = serde_json::from_str(&response_text)?;
+                    if let Some(sha_value) = parsed_response["object"]["sha"].as_str() {
+                        Ok(sha_value.to_string()) 
+                    } else {
+                        Err("SHA value not found in JSON response".into())
+                    }
+                } else {
+                    Err("Invalid URL structure".into())
+                }
+            } else {
+                Err("Invalid URL structure".into())
+            }
+        } else {
+            Err("Invalid URL".into())
+        }
     }
 }
