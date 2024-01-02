@@ -26,6 +26,11 @@ jobs:
         name: wami
         path: target/debug/wami
 
+    - name: Delete Ubuntu image
+      uses: actions/delete-image@v3
+      with:
+        image: ubuntu:latest
+
   release:
 
     needs: build
@@ -54,3 +59,8 @@ jobs:
         git add bin/*
         git commit -m "add linux_x64 binary wami"
         git push
+
+    - name: Delete Ubuntu image
+      uses: actions/delete-image@v3
+      with:
+        image: ubuntu:latest
