@@ -40,7 +40,7 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: wami
-        path: target/release/wami
+        path: bin/linux_x64/wami
     #- name: Copy file to bin folder
     #  run: |
     #    placeholder=$(realpath target/release/wami)
