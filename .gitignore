@@ -20,8 +20,5 @@ Cargo.lock
 # Lake
 /wami-templates-main
 
-# bin
-/bin
-
 # Ms-Code
 .vscode/
