@@ -33,7 +33,7 @@ jobs:
       run: cargo build --release --verbose
     
     - name: Copy release to destination
-      run: cp ./target/release/wami ./assets/bin/linux_x64/wami
+      run: mkdir ./assets/bin/linux_x64 && cp ./target/release/wami ./assets/bin/linux_x64/wami
       
     - name: Create Release
       id: create_release
