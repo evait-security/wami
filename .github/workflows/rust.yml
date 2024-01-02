@@ -37,7 +37,7 @@ jobs:
       
     - name: Create Release
       id: create_release
-      uses: actions/create-release@v1
+      uses: actions/create-release@v2
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
@@ -48,7 +48,7 @@ jobs:
         prerelease: false
 
     - name: Upload Release Asset
-      uses: actions/upload-release-asset@v2
+      uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
@@ -56,28 +56,3 @@ jobs:
         asset_path: ./assets/bin/linux_x64/wami
         asset_name: wami
         asset_content_type: application/octet-stream
-    #- name: Move_wami
-    #  run: cp target/release/wami assets/wami
-    #- name: Upload wami
-    #  uses: actions/upload-artifact@v2
-    #  with:
-    #    name: wami
-    #    path: assets/wami
-    #- name: Copy file to bin folder
-    #  run: |
-    #    placeholder=$(realpath target/release/wami)
-    #    rm -Rf bin/linux_x64
-    #    mkdir -p bin/linux_x64
-    #    cp $placeholder bin/linux_x64
-    #    chmod +x bin/linux_x64/wami
-    #    ls -lah bin/linux_x64/wami
-    #  env:
-    #    ACCESS_TOKEN: ${{ secrets.rust.ci_readme_update }}
-    #
-    #- name: Commit and push changes
-    #  run: |
-    #    git config --global user.email "tb@evait.de"
-    #    git config --global user.name "NxtTAB"
-    #    git add bin/*
-    #    git commit -m "add linux_x64 binary wami"
-    #    git push
