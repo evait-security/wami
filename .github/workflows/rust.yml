@@ -36,11 +36,13 @@ jobs:
     - uses: actions/checkout@v2
     - name: Release_linux_x64
       run: cargo build --release --verbose
+    - name: Move_wami
+      run: cp target/release/wami assets/wami
     - name: Upload wami
       uses: actions/upload-artifact@v2
       with:
         name: wami
-        path: assets/bin/linux_x64/wami
+        path: assets/wami
     #- name: Copy file to bin folder
     #  run: |
     #    placeholder=$(realpath target/release/wami)
