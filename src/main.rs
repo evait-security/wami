@@ -3,6 +3,8 @@ mod lake;
 mod search;
 mod template;
 mod yaml_template;
+mod github_topic;
+mod github_search;
 
 use clap::{App, Arg};
 use colored::Colorize;
@@ -72,6 +74,14 @@ fn main() {
                 .multiple(true)
         )
         .arg(
+            Arg::with_name("list-topics")
+                .long("list-topics")
+                .value_name("LIST-TOPICS")
+                .help("This will use the GitHub API to list topics. This will exclude searching in the lake.")
+                .required(false)
+                .multiple(true)
+        )
+        .arg(
             Arg::with_name("sort")
                 .short("S")
                 .long("sort")
@@ -100,6 +110,30 @@ fn main() {
                 .takes_value(false)
         )
         .arg(
+            Arg::with_name("min-stars")
+                .long("min-stars")
+                .value_name("MIN-STARS")
+                .help("Set the minimum of stars that have to be present in the Github repos. The default value is 100")
+                .required(false)
+                .multiple(false)
+        )
+        .arg(
+            Arg::with_name("max-stars")
+                .long("max-stars")
+                .value_name("MAX-STARS")
+                .help("Set the maximum of stars that have to be present in the GitHub repos. The default value is set to 0 which means that there is no limit.")
+                .required(false)
+                .multiple(false)
+        )
+        .arg(
+            Arg::with_name("github-fork")
+                .long("github-fork")
+                .help("This will set the search option for GitHub to the forks of an project. The default value is set to false.")
+                .required(false)
+                .multiple(false)
+                .takes_value(false)             
+        )
+        .arg(
             Arg::with_name("max")
                 .short("M")
                 .long("max")
@@ -124,6 +158,14 @@ fn main() {
                 .value_name("WHY_NOT")
                 .takes_value(false)
                 .help("Set why not use different programs.")
+                .required(false)
+                .multiple(false)
+        )
+        .arg(
+            Arg::with_name("github")
+                .long("github")
+                .takes_value(false)
+                .help("This will set the search to the GitHub API.")
                 .required(false)
                 .multiple(false)
         )
@@ -295,6 +337,58 @@ fn main() {
         search.reference_set(&in_search_references_vec);
     }
 
+    // Is min-stars set for github search?
+    // Set it anyway because it will be ingnored, if the github search is not active.
+    if let Some(min_stars_str) = matches.value_of("min-stars") {
+        if let Ok(min_stars) = min_stars_str.parse::<isize>() {
+            if min_stars > 100 {
+                search.min_stars_set(min_stars);
+            } else {
+                search.min_stars_set(100);
+            }
+        } else {
+            search.min_stars_set(100);
+            println!("Failed to pares the min stars value. Please enter a vialed unsigned positive number.");
+            println!("Using the default of main 100 stars to search on github.");
+        }
+    }
+
+    // Is max-stars set for github search?
+    // If not, set it to zero or if it is zero,  
+    // set it to unlimited.
+    if let Some(max_stars_str) = matches.value_of("max-stars") {
+        if let Ok(max_stars) = max_stars_str.parse::<isize>() {
+            if  max_stars <= search.min_stars_get().to_owned() {
+                search.max_stars_set(0);
+            } else {
+                search.max_stars_set(max_stars);
+            }
+        } else {
+            // Prasing faild
+            search.max_stars_set(0);
+            println!("Failed to parse the max stars value please enter a valid number.");
+            println!("Using the default value 0, there will be no max value");
+
+        }
+    }
+
+    // Is the github fork search option set to true?
+    // If it is not set, the standard initialization of the search struct is github-fork = false.
+    // This will search the forks of an project on github.
+    if matches.is_present("github-fork") {
+        search.github_fork_set(true);
+    }
+    
+    if let Some(search_topics) = matches.values_of("list-topics") {
+        let out_search_topics_vec: Vec<String> =
+            search_topics
+                .map(|search_topic| search_topic
+                    .to_string())
+                .collect();
+        let _ = github_topic::get_github_topics(out_search_topics_vec);
+        std::process::exit(0); 
+    }
+
     // let mut lake_result: lake::Lake;
     let mut update = false;
 
@@ -313,9 +407,6 @@ fn main() {
         url = in_url.to_string();
     }
 
-    // The default value of max item to list is 10.
-    let mut max_list = 10;
-
     // In sort the default value for the sort value is asc
     let mut sort_value = "asc".to_string();
 
@@ -324,17 +415,18 @@ fn main() {
     {
         sort_value = sort.to_string();
     }
+    
+    // The default value of max item to list is 10.
+    let mut max_list: usize = 10;
+
     // Is the max value set?
     if let Some(search_names) = matches.value_of("max") {
-        let result: Result<usize, _> = search_names.parse();
-        match result {
-            Ok(value) => {
-                max_list = value;
-            }
-            Err(_) => {
-                // Parsing failed
-                println!("Failed to parse the max value please enter a valid number.");
-            }
+        if let Ok(max) = search_names.parse::<usize>() {
+            max_list = max;
+        } else {
+            // Praseing failed
+            println!("Failed to parse the max value please enter a vailid not negative number.");
+            println!("Using the default of 10 Items to list.");
         }
     }
 
@@ -344,38 +436,69 @@ fn main() {
         why_not_option = true;
     }
 
+    // Set the default value for the GitHub search.
+    let mut github: bool = false;
 
+    // Check if the GitHub search value is set to true.
+    if let Some(_search_name) = matches.values_of("github") {
+        github = true;
+    }   
+
+    // If github is not set
     // Create the lake an instance of the lake
     // We have the url if it has changed
     // We have the update boolean
     // And we have all the search parameters
-    let lake_result = lake::Lake::new(url, update, search);
+    if !github {
+        let lake_result = 
+            lake::Lake::new(
+                url, 
+                update, 
+                search
+            );
 
-    match lake_result {
-        Ok(mut lake) => {
-            // Now you have a valid Lake instance in the lake variable.
-            if matches.is_present("show-all") {
-                lake.print_top_hits(max_list, sort_value);
-            } else {
-                lake.print_top_short_list(max_list, sort_value, why_not_option);
-            }
+        match lake_result {
+            Ok(mut lake) => {
+                // Now you have a valid Lake instance in the lake variable.
+                if matches.is_present("show-all") {
+                    lake.print_top_hits(max_list, sort_value);
+                } else {
+                    lake.print_top_short_list(max_list, sort_value, why_not_option);
+                }
 
-            if !update {
-                match config::Config::get_git_hash(&lake.get_config_url()) {
-                    Ok(hash) => {
-                        if hash != lake.get_config_hash() {
-                            let message = format!("{}", "Please update the lake, it is outdated.".bold().red());
-                            println!("{}", message);
-                        }
-                    },
-                    Err(_err) => println!("Version of lake can not be downloaded.")
+                if !update {
+                    match config::Config::get_git_hash(&lake.get_config_url()) {
+                        Ok(hash) => {
+                            if hash != lake.get_config_hash() {
+                                let message = format!("{}", "Please update the lake, it is outdated.".bold().red());
+                                println!("{}", message);
+                            }
+                        },
+                        Err(_err) => println!("Version of lake can not be downloaded.")
+                    }
                 }
             }
+            Err(e) => {
+                println!("Failed to create the Lake: {}", e);
+                std::process::exit(1);
+            }
         }
-        Err(e) => {
-            println!("Failed to create the Lake: {}", e);
-            std::process::exit(1);
+    } else {
+        println!("before github_result");
+        let github_result = 
+            github_search::GithubSearch::new(
+                search
+            );
+        println!("after github_result");
+        match github_result {
+            Ok(search_result) => {
+                let result_string = search_result.to_string();
+                println!("{}", result_string);
+            }
+            Err(err) => {
+                println!("The response form GitHub is empty");
+                println!("Error: {:?}", err);
+            }
         }
     }
-
 }

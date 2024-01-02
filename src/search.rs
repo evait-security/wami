@@ -15,6 +15,9 @@ pub struct Search {
     tags: Vec<String>,
     description: String,
     references: Vec<String>,
+    min_stars: isize,
+    max_stars: isize,
+    github_fork: bool,
 }
 
 impl Search {
@@ -25,6 +28,9 @@ impl Search {
             tags: Vec::new(),
             description: "".to_owned(),
             references: Vec::new(),
+            min_stars: 100,
+            max_stars: -1, // The -1 will set the max value to an open end.
+            github_fork: false,
         }
     }
     
@@ -66,6 +72,30 @@ impl Search {
 
     pub fn reference_set(&mut self, in_reference: &Vec<String>) {
         self.references = in_reference.to_owned();
+    }
+
+    pub fn min_stars_get(&self) -> &isize {
+        &self.min_stars
+    }
+
+    pub fn min_stars_set(&mut self, in_min_stars: isize) {
+        self.min_stars = in_min_stars.to_owned();
+    }
+
+    pub fn max_stars_get(&self) -> &isize {
+        &self.max_stars
+    }
+
+    pub fn max_stars_set(&mut self, in_max_stars: isize) {
+        self.max_stars = in_max_stars.to_owned();
+    }
+
+    pub fn github_fork_get(&self) -> &bool {
+        &self.github_fork
+    }
+
+    pub fn github_fork_set(&mut self, in_github_fork: bool) {
+        self.github_fork = in_github_fork.to_owned();
     }
 
     fn word_similarities(in_value: &[String], in_query: &[String]) -> f32 {
@@ -199,6 +229,9 @@ mod tests {
         assert_eq!(search.tags, Vec::<String>::new());
         assert_eq!(search.description, "");
         assert_eq!(search.references, Vec::<String>::new());
+        assert_eq!(search.min_stars, 100);
+        assert_eq!(search.max_stars, -1);
+        assert_eq!(search.github_fork, false);
     }
 
     #[test]
@@ -208,14 +241,20 @@ mod tests {
             title: "".to_owned(),
             tags: Vec::new(),
             description: "".to_owned(),
-            references: Vec::new()
+            references: Vec::new(),
+            min_stars: 100,
+            max_stars: 0,
+            github_fork: true,
         };
 
         assert_eq!(search.id, "test");
         assert_eq!(search.title, "");
         assert_eq!(search.tags, Vec::<String>::new());
         assert_eq!(search.description, "");
-        assert_eq!(search.references, Vec::<String>::new());    
+        assert_eq!(search.references, Vec::<String>::new());
+        assert_eq!(search.min_stars, 100);
+        assert_eq!(search.max_stars, 0);
+        assert_eq!(search.github_fork, true);
     }
 
     #[test]
@@ -225,14 +264,20 @@ mod tests {
             title: "test".to_owned(),
             tags: Vec::new(),
             description: "".to_owned(),
-            references: Vec::new()
+            references: Vec::new(),
+            min_stars: 100,
+            max_stars: 0,
+            github_fork: true,
         };
 
         assert_eq!(search.id, "");
         assert_eq!(search.title, "test");
         assert_eq!(search.tags, Vec::<String>::new());
         assert_eq!(search.description, "");
-        assert_eq!(search.references, Vec::<String>::new());    
+        assert_eq!(search.references, Vec::<String>::new());
+        assert_eq!(search.min_stars, 100);
+        assert_eq!(search.max_stars, 0);
+        assert_eq!(search.github_fork, true);
     }
 
     #[test]
@@ -242,7 +287,10 @@ mod tests {
             title: "".to_owned(),
             tags: vec!["test".to_owned()],
             description: "".to_owned(),
-            references: Vec::new()
+            references: Vec::new(),
+            min_stars: 100,
+            max_stars: -1,
+            github_fork: true,
         };
 
         assert_eq!(search.id, "");
@@ -250,6 +298,9 @@ mod tests {
         assert_eq!(search.tags, vec![String::from("test")]);    
         assert_eq!(search.description, "");
         assert_eq!(search.references, Vec::<String>::new());
+        assert_eq!(search.min_stars, 100);
+        assert_eq!(search.max_stars, -1);
+        assert_eq!(search.github_fork, true);
     }
 
     #[test]
@@ -259,14 +310,20 @@ mod tests {
             title: "".to_owned(),
             tags: Vec::new(),
             description: "test".to_owned(),
-            references: Vec::new()
+            references: Vec::new(),
+            min_stars: 100,
+            max_stars: -1,
+            github_fork: true,
         };
 
         assert_eq!(search.id, "");
         assert_eq!(search.title, "");
         assert_eq!(search.tags, Vec::<String>::new());
         assert_eq!(search.description, "test");
-        assert_eq!(search.references, Vec::<String>::new());    
+        assert_eq!(search.references, Vec::<String>::new());
+        assert_eq!(search.min_stars, 100);
+        assert_eq!(search.max_stars, -1);   
+        assert_eq!(search.github_fork, true); 
     }
 
     #[test]
@@ -276,16 +333,114 @@ mod tests {
             title: "".to_owned(),
             tags: Vec::new(),
             description: "".to_owned(),
-            references: vec!["test".to_owned()]
+            references: vec!["test".to_owned()],
+            min_stars: 100,
+            max_stars: -1,
+            github_fork: true,
         };
-
 
         assert_eq!(search.id, "");
         assert_eq!(search.title, "");
         assert_eq!(search.tags, Vec::<String>::new());
         assert_eq!(search.description, "");
-        assert_eq!(search.references, vec![String::from("test")]);    
+        assert_eq!(search.references, vec![String::from("test")]);
+        assert_eq!(search.min_stars, 100);
+        assert_eq!(search.max_stars, -1);
+        assert_eq!(search.github_fork, true);
     }
+
+    #[test]
+    fn test_search_new_just_min_stars() {
+        let search = Search{
+            id: "".to_owned(),
+            title: "".to_owned(),
+            tags: Vec::new(),
+            description: "".to_owned(),
+            references: Vec::new(),
+            min_stars: 1000,
+            max_stars: -1,
+            github_fork: true,
+        };
+
+        assert_eq!(search.id, "");
+        assert_eq!(search.title, "");
+        assert_eq!(search.tags, Vec::<String>::new());
+        assert_eq!(search.description, "".to_owned());
+        assert_eq!(search.references, Vec::<String>::new());
+        assert_eq!(search.min_stars, 1000);
+        assert_eq!(search.max_stars, -1);
+        assert_eq!(search.github_fork, true);
+    }
+
+    #[test]
+    fn test_search_new_just_max_stars() {
+        let search = Search{
+            id: "".to_owned(),
+            title: "".to_owned(),
+            tags: Vec::new(),
+            description: "".to_owned(),
+            references: Vec::new(),
+            min_stars: 100,
+            max_stars: 10,
+            github_fork: true,
+        };
+
+        assert_eq!(search.id, "");
+        assert_eq!(search.title, "");
+        assert_eq!(search.tags, Vec::<String>::new());
+        assert_eq!(search.description, "".to_owned());
+        assert_eq!(search.references, Vec::<String>::new());
+        assert_eq!(search.min_stars, 100);
+        assert_eq!(search.max_stars, 10);
+        assert_eq!(search.github_fork, true);
+    }
+
+    #[test]
+    fn test_search_new_just_github_fork() {
+        let search = Search{
+            id: "".to_owned(),
+            title: "".to_owned(),
+            tags: Vec::new(),
+            description: "".to_owned(),
+            references: Vec::new(),
+            min_stars: 100,
+            max_stars: -1,
+            github_fork: false,
+        };
+
+        assert_eq!(search.id, "");
+        assert_eq!(search.title, "");
+        assert_eq!(search.tags, Vec::<String>::new());
+        assert_eq!(search.description, "".to_owned());
+        assert_eq!(search.references, Vec::<String>::new());
+        assert_eq!(search.min_stars, 100);
+        assert_eq!(search.max_stars, -1);
+        assert_eq!(search.github_fork, false);
+    }
+
+    #[test]
+    fn test_search_new_just_github_last_push() {
+        let search = Search{
+            id: "".to_owned(),
+            title: "".to_owned(),
+            tags: Vec::new(),
+            description: "".to_owned(),
+            references: Vec::new(),
+            min_stars: 100,
+            max_stars: -1,
+            github_fork: true,
+        };
+
+        assert_eq!(search.id, "");
+        assert_eq!(search.title, "");
+        assert_eq!(search.tags, Vec::<String>::new());
+        assert_eq!(search.description, "".to_owned());
+        assert_eq!(search.references, Vec::<String>::new());
+        assert_eq!(search.min_stars, 100);
+        assert_eq!(search.max_stars, -1);
+        assert_eq!(search.github_fork, true);
+    }
+
 
     #[test]
     fn test_search_id_get() {
@@ -415,6 +570,80 @@ mod tests {
         let out_tags = search.reference_get();
 
         assert_eq!(out_tags, &vec!["https://loler_gmbh.com", "script<alert()>"]);
+    }
+
+    #[test]
+    fn test_search_min_stars_get() {
+        let mut search = Search::new_empty();
+        search.min_stars = 1000;
+
+        assert_eq!(search.min_stars, 1000);
+    }
+
+    #[test]
+    fn test_search_min_stars_set() {
+        let mut search = Search::new_empty();
+        search.min_stars_set(1000);
+
+        assert_eq!(search.min_stars, 1000);
+    }
+
+    #[test]
+    fn test_search_min_stars_set_get() {
+        let mut search = Search::new_empty();
+        search.min_stars_set(1000);
+        let out_min_stars = search.min_stars_get();
+
+        assert_eq!(out_min_stars, &1000);
+    }
+
+    #[test]
+    fn test_search_max_stars_get() {
+        let mut search = Search::new_empty();
+        search.max_stars = 10;
+
+        assert_eq!(search.max_stars_get(), &10);
+    }
+
+    #[test]
+    fn test_search_max_stars_set() {
+        let mut search = Search::new_empty();
+        search.max_stars_set(10);
+
+        assert_eq!(search.max_stars, 10);
+    }
+
+    #[test]
+    fn test_search_max_stars_set_get() {
+        let mut search = Search::new_empty();
+        search.max_stars_set(10);
+        let out_max_stars = search.max_stars_get();
+
+        assert_eq!(out_max_stars, &10);
+    }
+
+    #[test]
+    fn test_search_github_fork_get() {
+        let mut search = Search::new_empty();
+        search.github_fork = false;
+
+        assert_eq!(search.github_fork_get(), &false);
+    }
+    
+    #[test]
+    fn test_search_github_fork_set() {
+        let mut search = Search::new_empty();
+        search.github_fork_set(false);
+
+        assert_eq!(search.github_fork, false);
+    }
+
+    #[test]
+    fn test_search_github_fork_set_get() {
+        let mut search = Search::new_empty();
+        search.github_fork_set(false);
+
+        assert_eq!(search.github_fork_get(), &false);
     }
 
     #[test]
