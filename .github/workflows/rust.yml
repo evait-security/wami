@@ -36,21 +36,26 @@ jobs:
     - uses: actions/checkout@v2
     - name: Release_linux_x64
       run: cargo build --release --verbose
-    - name: Copy file to bin folder
-      run: |
-        placeholder=$(realpath target/release/wami)
-        rm -Rf bin/linux_x64
-        mkdir -p bin/linux_x64
-        cp $placeholder bin/linux_x64
-        chmod +x bin/linux_x64/wami
-        ls -lah bin/linux_x64/wami
-      env:
-        ACCESS_TOKEN: ${{ secrets.rust.ci_readme_update }}
-
-    - name: Commit and push changes
-      run: |
-        git config --global user.email "tb@evait.de"
-        git config --global user.name "NxtTAB"
-        git add bin/*
-        git commit -m "add linux_x64 binary wami"
-        git push
+    - name: Upload wami
+      uses: actions/upload-artifact@v2
+      with:
+        name: wami
+        path: target/release/wami
+    #- name: Copy file to bin folder
+    #  run: |
+    #    placeholder=$(realpath target/release/wami)
+    #    rm -Rf bin/linux_x64
+    #    mkdir -p bin/linux_x64
+    #    cp $placeholder bin/linux_x64
+    #    chmod +x bin/linux_x64/wami
+    #    ls -lah bin/linux_x64/wami
+    #  env:
+    #    ACCESS_TOKEN: ${{ secrets.rust.ci_readme_update }}
+    #
+    #- name: Commit and push changes
+    #  run: |
+    #    git config --global user.email "tb@evait.de"
+    #    git config --global user.name "NxtTAB"
+    #    git add bin/*
+    #    git commit -m "add linux_x64 binary wami"
+    #    git push
