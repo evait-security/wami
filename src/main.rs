@@ -8,13 +8,16 @@ mod github_search;
 
 use clap::{App, Arg};
 use colored::Colorize;
+use std::io::{self};
+
 
 fn main() {
     // Define the command-line arguments
-    let matches = App::new(format!("{} - What am I", "WAMI".bold().green()))
+    let about_text = format!("{} is a user-friendly tool designed in Rust, powered by Cargo, to assist individuals who struggle with remembering the names of the various programs they utilize. This open-source program aims to simplify the process of finding the most suitable programs for specific tasks.\n\nCreated at 10.07.2023", "WAMI".bold().green());
+    let app = App::new(format!("{} - What am I", "WAMI".bold().green()))
         .version("\tVersion: 0.1.0\n")
         .author("evait security GmbH\nNxtTAB <wami@evait.de>\n\n")
-        .about(&*format!("{} is a user-friendly tool designed in Rust, powered by Cargo, to assist individuals who struggle with remembering the names of the various programs they utilize. This open-source program aims to simplify the process of finding the most suitable programs for specific tasks.\n\nCreated at 10.07.2023", "WAMI".bold().green()))
+        .about(&*about_text)
         .arg(
             Arg::with_name("strings")
                 .value_name("STRING")
@@ -168,9 +171,17 @@ fn main() {
                 .help("This will set the search to the GitHub API.")
                 .required(false)
                 .multiple(false)
-        )
-        .get_matches();
+        );
 
+        let matches = app.clone().get_matches();
+       
+    // If there are no arguments show the help.
+    if std::env::args().len() <= 1 {
+        app.write_help(&mut io::stdout()).unwrap();
+        println!(); // New line at the end of the help output
+        return;
+    }
+    
     // using the search struct to define the search parameters.
     let mut search: search::Search 
         = search::Search::new_empty();
