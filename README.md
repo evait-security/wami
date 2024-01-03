@@ -30,10 +30,10 @@ To install Wami, follow these steps:
 ## Workflow
 Use ``` wami --help ``` for a list of options
 
-### Example
+### Example using the lake
 ``` ./wami -M 2 -S desc -s dns lookup hacking ```
 
-### Result
+### Result using the lake
 ```
 2: ADM DNS spoofing tools
     https://packetstormsecurity.com/files/10080/ADMid-pkg.tgz.html
@@ -42,7 +42,29 @@ Use ``` wami --help ``` for a list of options
     https://manned.org/host
 ```
 
-### Explanation
+### Example using github
+``` ./wami --github -M 2 -S desc -s dns lookup hacking ```
+
+### Result using github
+```
+2. Hacking_tool - Hi Friends of the hacking-tool script includes 9 tools in the data collection category such as: Whois | Port Scanner | Ping GeoIP | DNS Lookup Admin Finder | Headers | Reverse IP Cloudflare Bypasser This tool can be used
+  - url: https://github.com/Cyber-Security-856/Hacking_tool
+  - Stars: 9
+  - Topics
+  - Last update at: 2023-12-11T05:02:03Z
+  - Score of finding: 1
+1. go-mockdns - Boilerplate for testing of code involving DNS lookups, including unholy hacks to redirect net.Lookup* calls.
+  - url: https://github.com/foxcpp/go-mockdns
+  - Stars: 37
+  - Topics
+    - dns
+    - golang
+    - testing
+  - Last update at: 2023-10-08T13:38:52Z
+  - Score of finding: 1
+```
+
+### Explananing the parameters
 * ``` -M 2 ``` Set the maximum of listed programs default (MAX = 10)
 * ``` -S desc ``` This will determine the sorting direction asc or desc
 * ``` -s dns lookup hacking ``` The search all functionality will search throw all fields with the same search criteria.
