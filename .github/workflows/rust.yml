@@ -44,7 +44,7 @@ jobs:
       with:
         files: assets/bin/linux_x64/wami
         tag_name: linux_x64
-        name: Release v0.1.0
-        body: This is the new release
+        name: Release Linux x64
+        body: This is the new release of the Linux x64 wami binary file
         draft: false
         prerelease: false
