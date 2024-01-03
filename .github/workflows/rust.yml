@@ -37,16 +37,17 @@ jobs:
       
     - name: Create Release
       id: create_release
-      uses: actions/create-release@v1
+      uses: softprops/action-gh-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
+        files: assets/bin/linux_x64/wami
         tag_name: v0.1.0
         release_name: Release v0.1.0
         body: This is the new release
         draft: false
         prerelease: false
-
+#
 #    - name: Upload Release Asset
 #      uses: actions/upload-release-asset@v1
 #      env:
