@@ -490,7 +490,7 @@ fn main() {
             Ok(mut lake) => {
                 // Now you have a valid Lake instance in the lake variable.
                 if matches.is_present("show-all") {
-                    lake.print_top_hits(max_list, sort_value);
+                    lake.print_top_hits(max_list, sort_value, why_not_option);
                 } else {
                     lake.print_top_short_list(max_list, sort_value, why_not_option);
                 }
@@ -519,8 +519,13 @@ fn main() {
             );
         match github_result {
             Ok(search_result) => {
-                let result_string = search_result.to_string(max_list, &sort_value);
-                println!("{}", result_string);
+                if matches.is_present("show-all"){
+                    let result_string = search_result.to_string(max_list, &sort_value, true);
+                    println!("{}", result_string);
+                } else {
+                    let result_string = search_result.to_string(max_list, &sort_value, false);
+                    println!("{}", result_string);
+                }
             }
             Err(err) => {
                 println!("The response form GitHub is empty");

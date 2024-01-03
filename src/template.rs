@@ -1,4 +1,5 @@
 use crate::search;
+use colored::Colorize;
 use serde::Deserialize;
 
 #[derive(Deserialize, Debug)]
@@ -86,30 +87,26 @@ impl Template {
     }
 
     // This will return a string, for the console.
-    pub fn to_string(&self) -> String {
-        let mut out_string: String = String::new();
-        out_string.push_str(&self.id);
-        out_string.push_str("\n  Name: ");
-        out_string.push_str(&self.title);
-        out_string.push_str("\n  Tags: ");
-        out_string.push_str(&Template::tags_to_string(&self));
-        out_string.push_str("\n  Description: ");
-        out_string.push_str(&self.description);
-        out_string.push_str("\n  References: \n");
-        out_string.push_str(&Template::references_to_string(&self));
-        out_string.push_str("\n");
-        out_string.push_str(&Template::why_not_to_string(&self));
+    pub fn to_string(&self, why_not: bool) -> String {
+        let mut out_string = format!("{} {}\n    {}\n    {}\n{}",
+                                        &self.id.truecolor(90,90, 255),
+                                        &self.title.green(),
+                                        &Template::tags_to_string(&self).truecolor(200,200,150),
+                                        &self.description.truecolor(150,150,200),
+                                        &Template::references_to_string(&self).truecolor(200,200,200),
+                                    );
+        if why_not && self.why_not.is_empty(){
+            let why_not_out = format!("/n    {}", &self.why_not_to_string().bold().green());
+            out_string.push_str(&why_not_out);
+        }
         out_string.to_owned()
     }
 
     pub fn to_short_string(&self, why_not: bool) -> String {
-        let mut out_string: String = String::new();
-        out_string.push_str(&self.title);
-        out_string.push_str("\n");
-        out_string.push_str(&self.references_to_string());
-        if why_not {
-            out_string.push_str("\n    ");
-            out_string.push_str(&self.why_not_to_string());
+        let mut out_string = format!("{}\n{}",&self.title.green(),&self.references_to_string().truecolor(200, 200, 200));
+        if why_not && self.why_not.is_empty() {
+            let why_not_out = format!("\n    {}", &self.why_not_to_string().bold().green());
+            out_string.push_str(&why_not_out);
         }
         out_string.to_owned()
     }
@@ -120,7 +117,7 @@ impl Template {
         let tags_len = self.tags.len();
         for (index, tag) in self.tags.iter().enumerate() {
             out_string.push_str(tag);
-            if index < tags_len {
+            if index < tags_len - 1 {
                 out_string.push_str(", ");
             }
         }
@@ -146,16 +143,14 @@ impl Template {
     // Put the why_not in a string, one why_not per line
     fn why_not_to_string(&self) -> String {
         let mut out_string: String = String::new();
-        out_string.push_str("Why Not:\n    ");
         let why_not_len = self.why_not.len();
         for (index, why_not) in self.why_not.iter().enumerate() {
-            out_string.push_str("   ");
+            out_string.push_str("Why Not ");
             out_string.push_str(why_not);
             if index < why_not_len - 1 {
                 out_string.push_str("\n");
             }
         }
-
         out_string
     }
 
@@ -285,9 +280,10 @@ mod tests {
         assert_ne!(template.why_not[1], "Why_not2");
     }
 
-    // Tests for the to_string function
+    // Tests for the to_string function with why_not = true
     #[test]
     fn test_to_string() {
+        let in_why_not_bool = true;
         let tags: Vec<String> = vec!["tag1".to_string(), "tag2".to_string()];
         let references: Vec<String> = vec!["ref1".to_string(), "ref2".to_string()];
         let why_not: Vec<String> = vec!["why_not1".to_string(), "why_not2".to_string()];
@@ -306,13 +302,41 @@ mod tests {
         );
 
         // Compare the template to string output with the expected output
-        let expected_output = "id\n  Name: title\n  Tags: tag1, tag2, \n  Description: description\n  References: \n    ref1\n    ref2\nWhy Not:\n       why_not1\n   why_not2";
-        assert_eq!(template.to_string(), expected_output);
+        let expected_output = "\u{1b}[38;2;90;90;255mid\u{1b}[0m \u{1b}[32mtitle\u{1b}[0m\n    \u{1b}[38;2;200;200;150mtag1, tag2\u{1b}[0m\n    \u{1b}[38;2;150;150;200mdescription\u{1b}[0m\n\u{1b}[38;2;200;200;200m    ref1\n    ref2\u{1b}[0m";
+        assert_eq!(template.to_string(in_why_not_bool), expected_output);
     }
 
-    // Test for the to_short_string function.
+    // Tests for the to_string function with why_not = false
+    #[test]
+    fn test_to_string_why_not_false() {
+        let in_why_not_bool = false;
+        let tags: Vec<String> = vec!["tag1".to_string(), "tag2".to_string()];
+        let references: Vec<String> = vec!["ref1".to_string(), "ref2".to_string()];
+        let why_not: Vec<String> = vec!["why_not1".to_string(), "why_not2".to_string()];
+        let template = Template::new(
+            "id".to_string(),
+            "id_search".to_string(),
+            "title".to_string(),
+            "title_search".to_string(),
+            tags.clone(),
+            tags.clone(),
+            "description".to_string(),
+            "description_search".to_string(),
+            references.clone(),
+            references.clone(),
+            why_not.clone(),
+        );
+
+        // Compare the template to string output with the expected output
+        let expected_output = "\u{1b}[38;2;90;90;255mid\u{1b}[0m \u{1b}[32mtitle\u{1b}[0m\n    \u{1b}[38;2;200;200;150mtag1, tag2\u{1b}[0m\n    \u{1b}[38;2;150;150;200mdescription\u{1b}[0m\n\u{1b}[38;2;200;200;200m    ref1\n    ref2\u{1b}[0m";
+        assert_eq!(template.to_string(in_why_not_bool), expected_output);
+    }
+
+
+    // Test for the to_short_string function why_not = true
     #[test]
     fn test_to_short_string() {
+        let in_why_not_bool = true;
         let tags: Vec<String> = vec!["tag1".to_string(), "tag2".to_string()];
         let references: Vec<String> = vec!["ref1".to_string(), "ref2".to_string()];
         let why_not: Vec<String> = vec!["why_not1".to_string(), "why_not2".to_string()];
@@ -331,13 +355,40 @@ mod tests {
         );
 
         // Compare the template to string output with the expected output
-        let expected_output: &str = "id\n  Name: title\n  Tags: tag1, tag2, \n  Description: description\n  References: \n    ref1\n    ref2\nWhy Not:\n       why_not1\n   why_not2";
-        assert_eq!(template.to_string(), expected_output);
+        let expected_output: &str = "\u{1b}[38;2;90;90;255mid\u{1b}[0m \u{1b}[32mtitle\u{1b}[0m\n    \u{1b}[38;2;200;200;150mtag1, tag2\u{1b}[0m\n    \u{1b}[38;2;150;150;200mdescription\u{1b}[0m\n\u{1b}[38;2;200;200;200m    ref1\n    ref2\u{1b}[0m";
+        assert_eq!(template.to_string(in_why_not_bool), expected_output);
     }
 
-    // Test for the to_short_string_with_why_not.
+    // Test for the to_short_string function why_not = false
+    #[test]
+    fn test_to_short_string_why_not_false() {
+        let in_why_not_bool = false;
+        let tags: Vec<String> = vec!["tag1".to_string(), "tag2".to_string()];
+        let references: Vec<String> = vec!["ref1".to_string(), "ref2".to_string()];
+        let why_not: Vec<String> = vec!["why_not1".to_string(), "why_not2".to_string()];
+        let template = Template::new(
+            "id".to_string(),
+            "id_search".to_string(),
+            "title".to_string(),
+            "title".to_string(),
+            tags.clone(),
+            tags.clone(),
+            "description".to_string(),
+            "description_search".to_string(),
+            references.clone(),
+            references.clone(),
+            why_not.clone(),
+        );
+
+        // Compare the template to string output with the expected output
+        let expected_output: &str = "\u{1b}[38;2;90;90;255mid\u{1b}[0m \u{1b}[32mtitle\u{1b}[0m\n    \u{1b}[38;2;200;200;150mtag1, tag2\u{1b}[0m\n    \u{1b}[38;2;150;150;200mdescription\u{1b}[0m\n\u{1b}[38;2;200;200;200m    ref1\n    ref2\u{1b}[0m";
+        assert_eq!(template.to_string(in_why_not_bool), expected_output);
+    }
+
+    // Test for the to_short_string_with_why_not why_not = false
     #[test]
     fn test_to_short_string_with_why_not() {
+        let in_why_not_bool = false;
         let tags: Vec<String> = vec!["tag1".to_string(), "tag2".to_string()];
         let references: Vec<String> = vec!["ref1".to_string(), "ref2".to_string()];
         let why_not: Vec<String> = vec!["why_not1".to_string(), "why_not2".to_string()];
@@ -357,8 +408,35 @@ mod tests {
 
         // Compare the template to string output with the expected output
         let expected_output: &str =
-            "id\n  Name: title\n  Tags: tag1, tag2, \n  Description: description\n  References: \n    ref1\n    ref2\nWhy Not:\n       why_not1\n   why_not2";
-        assert_eq!(template.to_string(), expected_output);
+            "\u{1b}[38;2;90;90;255mid\u{1b}[0m \u{1b}[32mtitle\u{1b}[0m\n    \u{1b}[38;2;200;200;150mtag1, tag2\u{1b}[0m\n    \u{1b}[38;2;150;150;200mdescription\u{1b}[0m\n\u{1b}[38;2;200;200;200m    ref1\n    ref2\u{1b}[0m";
+        assert_eq!(template.to_string(in_why_not_bool), expected_output);
+    }
+
+    // Test for the to_short_string_with_why_not why_not = true.
+    #[test]
+    fn test_to_short_string_with_why_not_why_not_true() {
+        let in_why_not_bool = true;
+        let tags: Vec<String> = vec!["tag1".to_string(), "tag2".to_string()];
+        let references: Vec<String> = vec!["ref1".to_string(), "ref2".to_string()];
+        let why_not: Vec<String> = vec!["why_not1".to_string(), "why_not2".to_string()];
+        let template = Template::new(
+            "id".to_string(),
+            "id_search".to_string(),
+            "title".to_string(),
+            "title_search".to_string(),
+            tags.clone(),
+            tags.clone(),
+            "description".to_string(),
+            "description_search".to_string(),
+            references.clone(),
+            references.clone(),
+            why_not.clone(),
+        );
+
+        // Compare the template to string output with the expected output
+        let expected_output: &str =
+            "\u{1b}[38;2;90;90;255mid\u{1b}[0m \u{1b}[32mtitle\u{1b}[0m\n    \u{1b}[38;2;200;200;150mtag1, tag2\u{1b}[0m\n    \u{1b}[38;2;150;150;200mdescription\u{1b}[0m\n\u{1b}[38;2;200;200;200m    ref1\n    ref2\u{1b}[0m";
+        assert_eq!(template.to_string(in_why_not_bool), expected_output);
     }
 
     // Test the tags_to_string function against the expected values.
@@ -382,7 +460,7 @@ mod tests {
         );
 
         // Compare the return string with the expected string.
-        let expected_output: &str = "tag1, tag2, ";
+        let expected_output: &str = "tag1, tag2";
         assert_eq!(template.tags_to_string(), expected_output);
     }
 
@@ -431,7 +509,7 @@ mod tests {
         );
 
         // Compare the return string with the expected string.
-        let expected_output: &str = "Why Not:\n       why_not1\n   why_not2";
+        let expected_output: &str = "Why Not why_not1\nWhy Not why_not2";
         assert_eq!(template.why_not_to_string(), expected_output);
     }
 

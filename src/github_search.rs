@@ -1,5 +1,6 @@
 use crate::search::Search;
 
+use colored::Colorize;
 use isahc;
 use isahc::ReadResponseExt;
 use serde::Deserialize;
@@ -48,7 +49,9 @@ impl GithubSearch {
         if response.status().is_success() {
             // First make an string
             let tmp_body: String = response.text()?;
+            
 
+            println!("{}", tmp_body);
             // Then get the response body
             let response_body: Result<GithubSearch, serde_json::Error> = serde_json::from_str(&tmp_body);
 
@@ -73,7 +76,7 @@ impl GithubSearch {
             Err("Error: at GitHub API-Request".into())
         }
     }
-    pub fn to_string(&self, in_max_list: usize, in_sort_value: &str) -> String {
+    pub fn to_string(&self, in_max_list: usize, in_sort_value: &str, in_show_all: bool) -> String {
         let mut out_string: String = String::new();
         let mut count: usize;
 
@@ -82,30 +85,12 @@ impl GithubSearch {
             let items = Box::new(self.items.iter()) as Box<dyn Iterator<Item = &GitHubRepositories>>;
             for item in items {
                 if count < in_max_list + 1
-                { 
-                    out_string.push_str(&count.to_string());
-                    out_string.push_str(". ");
-                    out_string.push_str(&item.name);
-                    out_string.push_str(" - ");
-                    // The description is cut to an limit of 255 charters because there are description
-                    // that are used to communicant with other users and there are way to long.
-                    out_string.push_str(&cut_of_string(&item.description, 255).to_string());
-                    out_string.push_str("\n  - url: ");
-                    out_string.push_str(&item.html_url);
-                    out_string.push_str("\n  - Stars: ");
-                    out_string.push_str(&item.stargazers_count.to_string());
-                    out_string.push_str("\n  - Topics");
-                    // Topic is an array so we will loop throw it.
-                    for topic in &item.topics {
-                        out_string.push_str("\n    - ");
-                        out_string.push_str(&topic);
+                {
+                    if in_show_all {
+                        out_string.push_str(&print_long(count, item));
+                    } else {
+                        out_string.push_str(&print_short(count, item));
                     }
-                    out_string.push_str("\n  - Last update at: ");
-                    out_string.push_str(&item.updated_at);
-                    out_string.push_str("\n");
-                    out_string.push_str("  - Score of finding: ");
-                    out_string.push_str(&item.score.to_string());
-                    out_string.push_str("\n");
                 }
                 count += 1;
             }
@@ -114,30 +99,12 @@ impl GithubSearch {
             let items = Box::new(self.items.iter().rev()) as Box<dyn Iterator<Item = &GitHubRepositories>>;
             for item in items {
                 if count <= in_max_list
-                { 
-                    out_string.push_str(&count.to_string());
-                    out_string.push_str(". ");
-                    out_string.push_str(&item.name);
-                    out_string.push_str(" - ");
-                    // The description is cut to an limit of 255 charters because there are description
-                    // that are used to communicant with other users and there are way to long.
-                    out_string.push_str(&cut_of_string(&item.description, 255).to_string());
-                    out_string.push_str("\n  - url: ");
-                    out_string.push_str(&item.html_url);
-                    out_string.push_str("\n  - Stars: ");
-                    out_string.push_str(&item.stargazers_count.to_string());
-                    out_string.push_str("\n  - Topics");
-                    // Topic is an array so we will loop throw it.
-                    for topic in &item.topics {
-                        out_string.push_str("\n    - ");
-                        out_string.push_str(&topic);
+                {
+                    if in_show_all {
+                       out_string.push_str(&print_long(count, item));
                     }
-                    out_string.push_str("\n  - Last update at: ");
-                    out_string.push_str(&item.updated_at);
-                    out_string.push_str("\n");
-                    out_string.push_str("  - Score of finding: ");
-                    out_string.push_str(&item.score.to_string());
-                    out_string.push_str("\n");
+                } else {
+                    out_string.push_str(&print_short(count, item));
                 }
                 count -= 1;
             }
@@ -146,6 +113,50 @@ impl GithubSearch {
     }
 }
 
+
+fn print_short(count: usize, in_item: &GitHubRepositories) -> String {
+    let out_string = format!("{} {}\n  {}\n", 
+        &count.to_string().magenta(),
+        &in_item.name.green().green(),
+        &in_item.html_url.truecolor(200,200,200)
+    );
+    out_string
+}
+
+fn print_long(count: usize, in_item: &GitHubRepositories) -> String {
+    let mut out_string: String = String::new();
+    let tmp_out_string = format!
+        ("{} {}\n  {}\n  {}\n  * = {}\n",
+            &count.to_string().magenta(),
+            &in_item.name.green(),
+            &cut_of_string(&in_item.description, 255).to_string().truecolor(150,150,200),
+            &in_item.html_url.truecolor(200,200,200),
+            &in_item.stargazers_count.to_string().truecolor(150,200,200),
+        );
+    out_string.push_str(&tmp_out_string);
+                        
+    // Topic is an array so we will loop throw it.
+    out_string.push_str("  ");
+    for (index, topic) in in_item.topics.iter().enumerate() {
+        let tmp_topic = format!("{}", &topic.truecolor(200,200,150));
+        out_string.push_str(&tmp_topic);
+        // Add a "," except it is the last one.
+        if index < in_item.topics.len() - 1 {
+            out_string.push_str(", ");
+        } else {
+            out_string.push('\n');
+        }
+    }
+
+    let tmp_out_string = format!("  {} {}\n  {} {}\n",
+                                    "last update".magenta(),
+                                    &in_item.updated_at.blue(),
+                                    "score".magenta(),
+                                    &in_item.score.to_string().green()
+                                );
+    out_string.push_str(&tmp_out_string);
+    out_string
+}
 // This is used to cut an string to the max_length value.
 fn cut_of_string(input: &str, max_length: usize) -> String {
     if input.chars().count() <= max_length {

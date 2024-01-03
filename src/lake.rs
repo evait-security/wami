@@ -1,3 +1,4 @@
+use colored::Colorize;
 use crate::{config::Config, search::Search, template::Template, yaml_template};
 use reqwest::Client;
 use std::{
@@ -118,7 +119,7 @@ impl Lake {
     }
 
     // Sort the template vector in descending order based on distance.
-    pub fn print_top_hits(&mut self, how_many_max: usize, in_sort_value: String) {
+    pub fn print_top_hits(&mut self, how_many_max: usize, in_sort_value: String, why_not: bool) {
         let _ = &self
             .templates
             .sort_by(|a, b| b.distance().partial_cmp(&a.distance()).unwrap());
@@ -131,14 +132,12 @@ impl Lake {
             "desc" => {
                 for (index, template) in max_hits_templates.iter().rev().enumerate() {
                     let reverse_index = max_hits_templates.len() - index;
-                    println!("Number: {}", reverse_index);
-                    println!("Program: {}", template.to_string());
+                    println!("{} {}", reverse_index.to_string().magenta(), template.to_string(why_not));
                 }
             },
             _ => {
                 for (index, template) in max_hits_templates.iter().enumerate() {
-                    println!("Number: {}", index + 1);
-                    println!("Program: {}", template.to_string());
+                    println!("{} {}",(index + 1).to_string().magenta(), template.to_string(why_not));
                 }
             }
         }
@@ -157,12 +156,12 @@ impl Lake {
             "desc" => {
                 for (index, template) in max_hits_templates.iter().rev().enumerate() {
                     let reverse_index = max_hits_templates.len() - index;
-                    println!("{}: {}", reverse_index, template.to_short_string(why_not));
+                    println!("{} {}", reverse_index.to_string().magenta(), template.to_short_string(why_not));
                 }
             }
             _ => {
                 for (index, template) in max_hits_templates.iter().enumerate() {
-                    println!("{}: {}", index + 1, template.to_short_string(why_not));
+                    println!("{} {}", (index + 1).to_string().magenta(), template.to_short_string(why_not));
                 }
             }
         }
