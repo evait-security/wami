@@ -36,25 +36,15 @@ jobs:
         cp target/release/wami assets/bin/linux_x64/wami
         chmod +x assets/bin/linux_x64/wami
       
-    - name: Create Release
+    - name: Create Release Linux x64
       id: create_release
       uses: softprops/action-gh-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         files: assets/bin/linux_x64/wami
-        tag_name: v0.1.0
+        tag_name: linux_x64
         release_name: Release v0.1.0
         body: This is the new release
         draft: false
         prerelease: false
-#
-#    - name: Upload Release Asset
-#      uses: actions/upload-release-asset@v1
-#      env:
-#        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#      with:
-#        upload_url: ${{ steps.create.release.outputs.upload_url }}
-#        asset_path: ./assets/bin/linux_x64/wami
-#        asset_name: wami
-#        asset_content_type: application/octet-stream
