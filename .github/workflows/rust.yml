@@ -29,11 +29,11 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     
-    - name: Release_linux_x64
-      run: cargo build --release --verbose
-    
-    - name: Copy release to destination
-      run: mkdir ./assets/bin/linux_x64 && cp ./target/release/wami ./assets/bin/linux_x64/wami
+    - name: Release_linux_x64 and Copy to assets
+      run: |
+        cargo build --release --verbose
+        mkdir assets/bin/linux_x64
+        cp target/release/wami assets/bin/linux_x64/wami
       
     - name: Create Release
       id: create_release
@@ -47,12 +47,12 @@ jobs:
         draft: false
         prerelease: false
 
-    - name: Upload Release Asset
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create.release.outputs.upload_url }}
-        asset_path: ./assets/bin/linux_x64/wami
-        asset_name: wami
-        asset_content_type: application/octet-stream
+#    - name: Upload Release Asset
+#      uses: actions/upload-release-asset@v1
+#      env:
+#        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#      with:
+#        upload_url: ${{ steps.create.release.outputs.upload_url }}
+#        asset_path: ./assets/bin/linux_x64/wami
+#        asset_name: wami
+#        asset_content_type: application/octet-stream
