@@ -302,7 +302,7 @@ mod tests {
         );
 
         // Compare the template to string output with the expected output
-        let expected_output = "\u{1b}[38;2;90;90;255mid\u{1b}[0m \u{1b}[32mtitle\u{1b}[0m\n    \u{1b}[38;2;200;200;150mtag1, tag2\u{1b}[0m\n    \u{1b}[38;2;150;150;200mdescription\u{1b}[0m\n\u{1b}[38;2;200;200;200m    ref1\n    ref2\u{1b}[0m";
+        let expected_output = "id title\n    tag1, tag2\n    description\n    ref1\n    ref2";
         assert_eq!(template.to_string(in_why_not_bool), expected_output);
     }
 
@@ -328,7 +328,7 @@ mod tests {
         );
 
         // Compare the template to string output with the expected output
-        let expected_output = "\u{1b}[38;2;90;90;255mid\u{1b}[0m \u{1b}[32mtitle\u{1b}[0m\n    \u{1b}[38;2;200;200;150mtag1, tag2\u{1b}[0m\n    \u{1b}[38;2;150;150;200mdescription\u{1b}[0m\n\u{1b}[38;2;200;200;200m    ref1\n    ref2\u{1b}[0m";
+        let expected_output = "id title\n    tag1, tag2\n    description\n    ref1\n    ref2";
         assert_eq!(template.to_string(in_why_not_bool), expected_output);
     }
 
@@ -355,7 +355,7 @@ mod tests {
         );
 
         // Compare the template to string output with the expected output
-        let expected_output: &str = "\u{1b}[38;2;90;90;255mid\u{1b}[0m \u{1b}[32mtitle\u{1b}[0m\n    \u{1b}[38;2;200;200;150mtag1, tag2\u{1b}[0m\n    \u{1b}[38;2;150;150;200mdescription\u{1b}[0m\n\u{1b}[38;2;200;200;200m    ref1\n    ref2\u{1b}[0m";
+        let expected_output: &str = "id title\n    tag1, tag2\n    description\n    ref1\n    ref2";
         assert_eq!(template.to_string(in_why_not_bool), expected_output);
     }
 
@@ -381,7 +381,7 @@ mod tests {
         );
 
         // Compare the template to string output with the expected output
-        let expected_output: &str = "\u{1b}[38;2;90;90;255mid\u{1b}[0m \u{1b}[32mtitle\u{1b}[0m\n    \u{1b}[38;2;200;200;150mtag1, tag2\u{1b}[0m\n    \u{1b}[38;2;150;150;200mdescription\u{1b}[0m\n\u{1b}[38;2;200;200;200m    ref1\n    ref2\u{1b}[0m";
+        let expected_output: &str = "id title\n    tag1, tag2\n    description\n    ref1\n    ref2";
         assert_eq!(template.to_string(in_why_not_bool), expected_output);
     }
 
@@ -408,7 +408,7 @@ mod tests {
 
         // Compare the template to string output with the expected output
         let expected_output: &str =
-            "\u{1b}[38;2;90;90;255mid\u{1b}[0m \u{1b}[32mtitle\u{1b}[0m\n    \u{1b}[38;2;200;200;150mtag1, tag2\u{1b}[0m\n    \u{1b}[38;2;150;150;200mdescription\u{1b}[0m\n\u{1b}[38;2;200;200;200m    ref1\n    ref2\u{1b}[0m";
+            "id title\n    tag1, tag2\n    description\n    ref1\n    ref2";
         assert_eq!(template.to_string(in_why_not_bool), expected_output);
     }
 
@@ -435,7 +435,7 @@ mod tests {
 
         // Compare the template to string output with the expected output
         let expected_output: &str =
-            "\u{1b}[38;2;90;90;255mid\u{1b}[0m \u{1b}[32mtitle\u{1b}[0m\n    \u{1b}[38;2;200;200;150mtag1, tag2\u{1b}[0m\n    \u{1b}[38;2;150;150;200mdescription\u{1b}[0m\n\u{1b}[38;2;200;200;200m    ref1\n    ref2\u{1b}[0m";
+            "id title\n    tag1, tag2\n    description\n    ref1\n    ref2";
         assert_eq!(template.to_string(in_why_not_bool), expected_output);
     }
 
