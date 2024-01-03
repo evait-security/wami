@@ -27,6 +27,26 @@ To install Wami, follow these steps:
 3. ``` chmod +x wami ```
 4. ``` wami ```
 
+## Workflow
+Use ``` wami --help ``` for a list of options
+
+### Example
+``` ./wami -M 2 -S desc -s dns lookup hacking ```
+
+### Result
+```
+2: ADM DNS spoofing tools
+    https://packetstormsecurity.com/files/10080/ADMid-pkg.tgz.html
+    https://packetstormsecurity.com/files/download/10080/ADMid-pkg.tgz
+1: host - DNS lookup utility
+    https://manned.org/host
+```
+
+### Explanation
+* ``` -M 2 ``` Set the maximum of listed programs default (MAX = 10)
+* ``` -S desc ``` This will determine the sorting direction asc or desc
+* ``` -s dns lookup hacking ``` The search all functionality will search throw all fields with the same search criteria.
+
 ## Feedback and Support:
 We value your feedback and appreciate any bug reports or suggestions. Please open an issue on our GitHub repository to provide feedback or seek support.
 
