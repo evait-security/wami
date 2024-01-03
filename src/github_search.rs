@@ -50,8 +50,6 @@ impl GithubSearch {
             // First make an string
             let tmp_body: String = response.text()?;
             
-
-            println!("{}", tmp_body);
             // Then get the response body
             let response_body: Result<GithubSearch, serde_json::Error> = serde_json::from_str(&tmp_body);
 
