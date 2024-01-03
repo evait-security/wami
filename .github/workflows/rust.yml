@@ -34,6 +34,7 @@ jobs:
         cargo build --release --verbose
         mkdir -p assets/bin/linux_x64
         cp target/release/wami assets/bin/linux_x64/wami
+        chmod +x assets/bin/linux_x64/wami
       
     - name: Create Release
       id: create_release
