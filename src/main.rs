@@ -160,7 +160,7 @@ fn main() {
                 .long("why_not")
                 .value_name("WHY_NOT")
                 .takes_value(false)
-                .help("Set why not use different programs.")
+                .help("Set the why not flag to see other programs, witch are better for the use case.")
                 .required(false)
                 .multiple(false)
         )
