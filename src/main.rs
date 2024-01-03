@@ -113,6 +113,16 @@ fn main() {
                 .takes_value(false)
         )
         .arg(
+            Arg::with_name("offline")
+                .short("o")
+                .long("offline")
+                .value_name("OFFLINE")
+                .help("Set this flag if you do not want the online check for the updated lake file.")
+                .required(false)
+                .multiple(false)
+                .takes_value(false)
+        )
+        .arg(
             Arg::with_name("min-stars")
                 .long("min-stars")
                 .value_name("MIN-STARS")
@@ -400,12 +410,20 @@ fn main() {
         std::process::exit(0); 
     }
 
-    // let mut lake_result: lake::Lake;
+    // let mut update flag
     let mut update = false;
 
     // If the update flag is set, set update.
     if let Some(_search_name) = matches.values_of("update") {
         update = true;
+    }
+
+    // offline flag is set default to false so there will be an check if the lake is up to date
+    let mut offline: bool = false;
+
+    // if the offline flag is set, set the flag to true
+    if let Some(_search_name) = matches.values_of("offline") {
+        offline = true;
     }
 
     let mut url: String = "".to_string();
@@ -477,7 +495,7 @@ fn main() {
                     lake.print_top_short_list(max_list, sort_value, why_not_option);
                 }
 
-                if !update {
+                if !update && !offline {
                     match config::Config::get_git_hash(&lake.get_config_url()) {
                         Ok(hash) => {
                             if hash != lake.get_config_hash() {
