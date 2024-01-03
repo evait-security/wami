@@ -3,7 +3,7 @@
 
 # WAMI - What am I
 ## Description:
-WAMI is a user-friendly tool designed in Rust language, powered by Cargo, to assist individuals who struggle with remembering the names of the various programs they utilize. This open-source program aims to simplify the process of finding the most suitable programs for specific tasks.
+WAMI is a user-friendly command line tool designed in Rust language, powered by Cargo, to assist individuals who struggle with remembering the names of the various programs they utilize. This open-source program aims to simplify the process of finding the most suitable programs for specific tasks.
 
 ## Features:
 1. Program Recommendation: Wami analyzes the requirements of a given task and suggests the optimal programs to accomplish it efficiently.
@@ -23,7 +23,7 @@ Contributions to Wami are highly encouraged. Developers can add new programs, im
 
 ## Installation:
 To install Wami, follow these steps:
-1. [Download the binary](https://github.com/evait-security/wami/raw/main/bin/linux_x64/wami).
+1. [Download the binary](https://github.com/evait-security/wami/releases/download/linux_x64/wami).
 3. ``` chmod +x wami ```
 4. ``` wami ```
 
