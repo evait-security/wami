@@ -70,7 +70,7 @@ Use ``` wami --help ``` for a list of options
   - Score of finding: 1
 ```
 
-### Explananing the parameters
+### Explaining the parameters
 * ``` -M 2 ``` Set the maximum of listed programs default (MAX = 10)
 * ``` -S desc ``` This will determine the sorting direction asc or desc
 * ``` -s dns lookup hacking ``` The search all functionality will search throw all fields with the same search criteria.
