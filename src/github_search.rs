@@ -5,7 +5,7 @@ use isahc::ReadResponseExt;
 use serde::Deserialize;
 use std::error::Error;
 
-// This is the structure that will save the information of a repositorie.
+// This is the structure that will save the information of a repositories.
 #[derive(Debug, Deserialize)]
 struct GitHubRepositories {
     name: String,
@@ -73,34 +73,74 @@ impl GithubSearch {
             Err("Error: at GitHub API-Request".into())
         }
     }
-    pub fn to_string(&self) -> String {
+    pub fn to_string(&self, in_max_list: usize, in_sort_value: &str) -> String {
         let mut out_string: String = String::new();
-        let mut count: usize = 1;
-        for item in &self.items {
-            out_string.push_str(&count.to_string());
-            out_string.push_str(". ");
-            out_string.push_str(&item.name);
-            out_string.push_str(" - ");
-            // The description is cut to an limit of 255 charters because there are description
-            // that are used to communicant with other users and there are way to long.
-            out_string.push_str(&cut_of_string(&item.description, 255).to_string());
-            out_string.push_str("\n  - url: ");
-            out_string.push_str(&item.html_url);
-            out_string.push_str("\n  - Stars: ");
-            out_string.push_str(&item.stargazers_count.to_string());
-            out_string.push_str("\n  - Topics");
-            // Topic is an array so we will loop throw it.
-            for topic in &item.topics {
-                out_string.push_str("\n    - ");
-                out_string.push_str(&topic);
+        let mut count: usize;
+
+        if in_sort_value == "asc" {
+            count = 1;
+            let items = Box::new(self.items.iter()) as Box<dyn Iterator<Item = &GitHubRepositories>>;
+            for item in items {
+                if count < in_max_list + 1
+                { 
+                    out_string.push_str(&count.to_string());
+                    out_string.push_str(". ");
+                    out_string.push_str(&item.name);
+                    out_string.push_str(" - ");
+                    // The description is cut to an limit of 255 charters because there are description
+                    // that are used to communicant with other users and there are way to long.
+                    out_string.push_str(&cut_of_string(&item.description, 255).to_string());
+                    out_string.push_str("\n  - url: ");
+                    out_string.push_str(&item.html_url);
+                    out_string.push_str("\n  - Stars: ");
+                    out_string.push_str(&item.stargazers_count.to_string());
+                    out_string.push_str("\n  - Topics");
+                    // Topic is an array so we will loop throw it.
+                    for topic in &item.topics {
+                        out_string.push_str("\n    - ");
+                        out_string.push_str(&topic);
+                    }
+                    out_string.push_str("\n  - Last update at: ");
+                    out_string.push_str(&item.updated_at);
+                    out_string.push_str("\n");
+                    out_string.push_str("  - Score of finding: ");
+                    out_string.push_str(&item.score.to_string());
+                    out_string.push_str("\n");
+                }
+                count += 1;
             }
-            out_string.push_str("\n  - Last update at: ");
-            out_string.push_str(&item.updated_at);
-            out_string.push_str("\n");
-            out_string.push_str("  - Score of finding: ");
-            out_string.push_str(&item.score.to_string());
-            out_string.push_str("\n");
-            count += 1;
+        } else { // desc
+            count = self.items.iter().len();
+            let items = Box::new(self.items.iter().rev()) as Box<dyn Iterator<Item = &GitHubRepositories>>;
+            for item in items {
+                if count <= in_max_list
+                { 
+                    out_string.push_str(&count.to_string());
+                    out_string.push_str(". ");
+                    out_string.push_str(&item.name);
+                    out_string.push_str(" - ");
+                    // The description is cut to an limit of 255 charters because there are description
+                    // that are used to communicant with other users and there are way to long.
+                    out_string.push_str(&cut_of_string(&item.description, 255).to_string());
+                    out_string.push_str("\n  - url: ");
+                    out_string.push_str(&item.html_url);
+                    out_string.push_str("\n  - Stars: ");
+                    out_string.push_str(&item.stargazers_count.to_string());
+                    out_string.push_str("\n  - Topics");
+                    // Topic is an array so we will loop throw it.
+                    for topic in &item.topics {
+                        out_string.push_str("\n    - ");
+                        out_string.push_str(&topic);
+                    }
+                    out_string.push_str("\n  - Last update at: ");
+                    out_string.push_str(&item.updated_at);
+                    out_string.push_str("\n");
+                    out_string.push_str("  - Score of finding: ");
+                    out_string.push_str(&item.score.to_string());
+                    out_string.push_str("\n");
+                }
+                count -= 1;
+            }
         }
         out_string
     }

@@ -484,15 +484,13 @@ fn main() {
             }
         }
     } else {
-        println!("before github_result");
         let github_result = 
             github_search::GithubSearch::new(
                 search
             );
-        println!("after github_result");
         match github_result {
             Ok(search_result) => {
-                let result_string = search_result.to_string();
+                let result_string = search_result.to_string(max_list, &sort_value);
                 println!("{}", result_string);
             }
             Err(err) => {
