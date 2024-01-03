@@ -32,7 +32,7 @@ jobs:
     - name: Release_linux_x64 and Copy to assets
       run: |
         cargo build --release --verbose
-        mkdir assets/bin/linux_x64
+        mkdir -p assets/bin/linux_x64
         cp target/release/wami assets/bin/linux_x64/wami
       
     - name: Create Release
