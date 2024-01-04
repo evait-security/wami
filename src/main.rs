@@ -13,6 +13,32 @@ use std::io::{self};
 
 fn main() {
     // Define the command-line arguments
+    let help_flag_github= "--github".green();
+    let help_flag_list_topics = "--list-topics".green();
+    let help_flag_show_all = "-a".green();
+    let help_flag_search_all = "-s".green();
+    let help_flag_search_order = "-S".green();
+    let help_value_search_order_desc = "desc".truecolor(200,200,200);
+    let example_text = format!("Example:\n  {} {} {} {} {} {}\n    {}\n\n  {} {} {} {} {} {}\n    {}\n\n  {} {} {}\n    {}",
+                                    "wami".magenta(),
+                                    help_flag_show_all,
+                                    help_flag_search_order,
+                                    help_value_search_order_desc,
+                                    help_flag_search_all,
+                                    "pentest".truecolor(90,90,255),
+                                    "This example will search in the lake with extended output in descending order in all categories for the word pentest.",
+                                    "wami".magenta(),
+                                    help_flag_show_all,
+                                    help_flag_search_order,
+                                    help_value_search_order_desc,
+                                    help_flag_github,
+                                    "pentest".truecolor(90,90,255),
+                                    "This example will search in GitHub with extended output in descending order for the word pentest.",
+                                    "wami".magenta(),
+                                    help_flag_list_topics,
+                                    "pentest".truecolor(90,90,255),
+                                    "This example will search in GitHub for topics with the word pentest."
+                                );
     let about_text = format!("{} is a user-friendly tool designed in Rust, powered by Cargo, to assist individuals who struggle with remembering the names of the various programs they utilize. This open-source program aims to simplify the process of finding the most suitable programs for specific tasks.\n\nCreated at 10.07.2023", "WAMI".bold().green());
     let app = App::new(format!("{} - What am I", "WAMI".bold().green()))
         .version("\tVersion: 0.1.0\n")
@@ -181,7 +207,7 @@ fn main() {
                 .help("This will set the search to the GitHub API.")
                 .required(false)
                 .multiple(false)
-        );
+        ).after_help(&*example_text);
 
         let matches = app.clone().get_matches();
        
