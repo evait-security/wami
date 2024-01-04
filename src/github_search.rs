@@ -50,8 +50,11 @@ impl GithubSearch {
             // First make an string
             let tmp_body: String = response.text()?;
             
+            // Replace all NULL with ""
+            let finalized_body: String = tmp_body.replace(": null", ": \"\"");
+            
             // Then get the response body
-            let response_body: Result<GithubSearch, serde_json::Error> = serde_json::from_str(&tmp_body);
+            let response_body: Result<GithubSearch, serde_json::Error> = serde_json::from_str(&finalized_body);
 
             match response_body {
                 Ok(search_result) => {
