@@ -1,3 +1,4 @@
+use colored::Colorize;
 use isahc;
 use isahc::ReadResponseExt;
 use serde::Deserialize;
@@ -26,7 +27,8 @@ pub fn get_github_topics(in_list: Vec<String>) -> Result<(), isahc::Error> {
             Ok(response_body) => {
                 let mut count = 1;
                 for item in response_body.items {
-                    println!("{}. {}", count, item.name );
+                    let tmp_out_string=format!("{} {}", count.to_string().magenta(), item.name.green() );
+                    println!("{}", tmp_out_string);
                     count += 1;
                 }
             }
