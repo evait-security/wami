@@ -39,10 +39,10 @@ impl Template {
             Template::convert_to_lowercase_alphanumeric_with_hyphens(&in_id_search);
 
         // Calculate the similarity from the unique name to the unique search name.
-        let out_id_distance: f32 = search::Search::similarity_full(&out_id, &out_id_search);
+        let out_id_distance: f32 = search::Search::cosine_similarity(&out_id, &out_id_search);
 
         // Calculate the similarity from the real title to the search title.
-        let out_title_distance: f32 = search::Search::similarity_full(&in_title, &in_title_search);
+        let out_title_distance: f32 = search::Search::cosine_similarity(&in_title, &in_title_search);
 
         // Convert the incoming tags to lowercase alphanumeric letters with hyphens.
         let out_tags: Vec<String> = Template::convert_tags_to_excepted_format(&in_tags);
@@ -52,15 +52,15 @@ impl Template {
             Template::convert_tags_to_excepted_format(&in_tags_search);
 
         // Calculate the similarities from the tags to the search tags.
-        let out_tags_distance: f32 = search::Search::similarities_full(&out_tags, &out_tags_search);
+        let out_tags_distance: f32 = search::Search::cosine_similarities(&out_tags, &out_tags_search);
 
         // Calculate the similarity from the description to the search description.
         let out_description_distance: f32 =
-            search::Search::similarity_full(&in_description, &in_description_search);
+            search::Search::cosine_similarity(&in_description, &in_description_search);
 
         // Calculate the similarity from the references to the search references.
         let out_references_distance: f32 =
-            search::Search::similarities_full(&in_references, &in_references_search);
+            search::Search::cosine_similarities(&in_references, &in_references_search);
 
         // Calculate the over all similarity. This is done by adding all 5 distances together and multiplying them by 0.2.
         let out_distance: f32 = (out_id_distance

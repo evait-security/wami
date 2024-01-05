@@ -115,7 +115,7 @@ fn main() {
                 .short("S")
                 .long("sort")
                 .value_name("SORT")
-                .help("This will determine the sorting direction asc or desc")
+                .help("This will determine the sorting direction asc or desc, desc is the default direction.")
                 .required(false)
                 .multiple(false)
         )
@@ -463,7 +463,7 @@ fn main() {
     }
 
     // In sort the default value for the sort value is asc
-    let mut sort_value = "asc".to_string();
+    let mut sort_value = "desc".to_string();
 
     if let Some(sort) = matches
         .value_of("sort")
@@ -511,7 +511,6 @@ fn main() {
                 update, 
                 search
             );
-
         match lake_result {
             Ok(mut lake) => {
                 // Now you have a valid Lake instance in the lake variable.
