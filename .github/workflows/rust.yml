@@ -32,7 +32,7 @@ jobs:
         chmod +x assets/bin/linux_x64/wami
 
     - name: Create Releass
-      uses: softprops/actions-gh-release@1
+      uses: softprops/action-gh-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
