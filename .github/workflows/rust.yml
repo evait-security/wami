@@ -9,34 +9,30 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  build:
+  build_and_release:
 
     runs-on: ubuntu-latest
 
+    container: 
+      image: rust:1.70-slim7-bullseye
+
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
+
     - name: Run tests
       run: cargo test --verbose
 
-  release:
+    - name: Build Release
+      run: cargo build --release --verbose
 
-    needs: build
-
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v2
-    
-    - name: Release_linux_x64 and Copy to assets
+    - name: Prepare Release Asset
       run: |
-        cargo build --release --verbose
         mkdir -p assets/bin/linux_x64
         cp target/release/wami assets/bin/linux_x64/wami
         chmod +x assets/bin/linux_x64/wami
-      
-    - name: Create Release Linux x64
-      id: create_release
-      uses: softprops/action-gh-release@v1
+
+    - name: Create Releass
+      uses: softprops/actions-gh-release@1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
@@ -46,3 +42,13 @@ jobs:
         body: This is the new release of the Linux x64 wami binary file
         draft: false
         prerelease: false
+
+    - name: Clean up
+      if: always()
+      run: |
+        rm -rf assets
+        rm -rf target
+        cargo clean
+        rm -rf ~/.cargo/registry
+        rm -rf ~/.cargo/git
+        df -h # Displays the available storage space
