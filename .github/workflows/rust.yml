@@ -14,11 +14,16 @@ jobs:
     runs-on: ubuntu-latest
 
     container: 
-      image: rust:1.70-slim-bullseye
+      image: rust:slim-bullseye
 
     steps:
     - uses: actions/checkout@v3
 
+    - name: Install OpenSSL
+      run: |
+        apt-get update
+        apt-get install -y pkg-config libssl-dev
+    
     - name: Run tests
       run: cargo test --verbose
 
