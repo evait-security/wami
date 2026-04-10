@@ -1,7 +1,7 @@
 [package]
 name = "wami"
 version = "0.1.0"
-authors = ["NxtTAB tb@evait.de"]
+authors = ["NxtTAB tb@greenhats.com"]
 edition = "2021"
 readme = "README.md"
 repository = "https://github.com/evait-security/wami/"
@@ -27,4 +27,8 @@ url = "2.3"
 zip = "0.5"
 
 [profile.release]
-opt-level = 3
+strip = true
+opt-level = "z"
+lto = true
+codegen-units = 1
+panic = "abort"
